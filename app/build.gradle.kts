@@ -17,8 +17,21 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        val devMail = project.findProperty("DEV_MAIL") ?: ""
+        buildConfigField("String", "DEV_MAIL", "\"$devMail\"")
+
         val apiKey = project.findProperty("OPENWEATHER_API_KEY") ?: ""
         buildConfigField("String", "OPENWEATHER_API_KEY", "\"$apiKey\"")
+
+        val pastYearsToFetchCount = project.findProperty("PAST_YEARS_TO_FETCH_COUNT")?.toString() ?: "1"
+        buildConfigField("int", "PAST_YEARS_TO_FETCH_COUNT", pastYearsToFetchCount)
+
+        val pastYearsToFetchCountMax = project.findProperty("PAST_YEARS_TO_FETCH_COUNT_MAX")?.toString() ?: "1"
+        buildConfigField("int", "PAST_YEARS_TO_FETCH_COUNT_MAX", pastYearsToFetchCountMax)
+
+        val devModeProp = project.findProperty("DEV_MODE")?.toString() ?: "false"
+        buildConfigField("boolean", "DEV_MODE", devModeProp)
+
     }
 
     buildFeatures {

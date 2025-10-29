@@ -1,8 +1,9 @@
 package com.example.weathertrace.domain.model
-import com.example.weathertrace.BuildConfig
+
+import java.time.LocalDate
 
 data class DailyWeatherModel(
-    val date: String,
+    val date: LocalDate,
     val cloudCover: Afternoon<Double>,
     val humidity: Afternoon<Double>,
     val precipitation: Total<Double>,

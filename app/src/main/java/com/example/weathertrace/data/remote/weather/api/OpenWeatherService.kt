@@ -3,6 +3,7 @@ import com.example.weathertrace.data.remote.weather.dto.*
 
 import retrofit2.http.GET
 import retrofit2.http.Query
+import java.time.LocalDate
 
 
 interface OpenWeatherService {
@@ -10,7 +11,7 @@ interface OpenWeatherService {
     suspend fun getDailyWeather(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
-        @Query("date") date: String,
+        @Query("date") date: LocalDate,
         @Query("appid") apiKey: String,
         @Query("units") units: String? = null,
         @Query("lang") lang: String? = null
