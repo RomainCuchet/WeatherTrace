@@ -17,6 +17,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        val devMail = project.findProperty("DEV_MAIL") ?: ""
+        buildConfigField("String", "DEV_MAIL", "\"$devMail\"")
+
         val apiKey = project.findProperty("OPENWEATHER_API_KEY") ?: ""
         buildConfigField("String", "OPENWEATHER_API_KEY", "\"$apiKey\"")
 
