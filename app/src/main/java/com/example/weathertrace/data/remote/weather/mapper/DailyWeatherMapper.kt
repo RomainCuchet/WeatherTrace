@@ -5,10 +5,12 @@ import com.example.weathertrace.domain.model.*
 import com.example.weathertrace.domain.model.Afternoon
 import com.example.weathertrace.domain.model.Total
 
+import java.time.LocalDate
+
 
 fun DailyWeatherDto.toDomain(): DailyWeatherModel {
     return DailyWeatherModel(
-        date = this.date,
+        date = LocalDate.parse(date) ,
         cloudCover = Afternoon(this.cloudCover.afternoon),
         humidity = Afternoon(this.humidity.afternoon),
         pressure = Afternoon(this.pressure.afternoon),

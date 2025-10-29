@@ -1,5 +1,5 @@
 package com.example.weathertrace
-import com.example.weathertrace.BuildConfig
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,60 +13,68 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.weathertrace.domain.repository.WeatherRepository
-import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
+import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
 
-    private val repository = WeatherRepository(devMode = false)
+    private val repository = WeatherRepository(devMode = BuildConfig.DEV_MODE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        if (BuildConfig.DEV_MODE){
+            println("⚙️ Dev Mod activated : using mocked data")
+        }
+
         setContent {
             MaterialTheme {
-                var weatherText by remember { mutableStateOf("Loading...") }
+                var weatherText by remember { mutableStateOf("Loading historical weather...") }
 
                 LaunchedEffect(Unit) {
                     try {
-                        val weather = repository.getDailyWeather(
+                        // Get a list of historical weather entries
+                        val historicalWeathers = repository.getHistoricalDailyWeathers(
                             lat = 48.8566,
                             lon = 2.3522,
-                            date = "2025-10-28",
+                            baseDate = LocalDate.now(),
                             apiKey = BuildConfig.OPENWEATHER_API_KEY,
                             units = "metric",
-                            lang = "fr"
+                            lang = "en" // English
                         )
 
-                        weatherText = """
-                            ✅ Données météo :
+                        // Build a display string for all entries
+                        weatherText = historicalWeathers.joinToString(separator = "\n\n") { weather ->
+                            """
+                            ✅ Weather Data:
                             --------------------
                             Date: ${weather.date}
                             Temp: ${weather.temperature.afternoon}°C
-                            Humidité: ${weather.humidity.afternoon}%
-                            Nuages: ${weather.cloudCover.afternoon}%
-                            Précipitations: ${weather.precipitation.total} mm
-                            Vent: ${weather.wind.max.speed} km/h (${weather.wind.max.direction}°)
-                        """.trimIndent()
+                            Humidity: ${weather.humidity.afternoon}%
+                            Cloud Cover: ${weather.cloudCover.afternoon}%
+                            Precipitation: ${weather.precipitation.total} mm
+                            Wind: ${weather.wind.max.speed} km/h (${weather.wind.max.direction}°)
+                            """.trimIndent()
+                        }
 
                         println(weatherText)
 
                     } catch (e: HttpException) {
                         val errorCode = e.code()
                         val errorBody = e.response()?.errorBody()?.string()
-                        weatherText = "❌ Erreur API ($errorCode) : ${errorBody ?: e.message()}"
+                        weatherText = "❌ API Error ($errorCode): ${errorBody ?: e.message()}"
                         println(weatherText)
                         e.printStackTrace()
 
                     } catch (e: IOException) {
-                        weatherText = "⚠️ Erreur réseau : ${e.message}"
+                        weatherText = "⚠️ Network Error: ${e.message}"
                         println(weatherText)
                         e.printStackTrace()
 
                     } catch (e: Exception) {
-                        weatherText = "❗Erreur inconnue : ${e.message}"
+                        weatherText = "❗Unknown Error: ${e.message}"
                         println(weatherText)
                         e.printStackTrace()
                     }
