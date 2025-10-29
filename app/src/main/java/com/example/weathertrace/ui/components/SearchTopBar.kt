@@ -14,6 +14,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,8 +23,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -38,6 +45,7 @@ fun SearchTopBar(
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var expanded by rememberSaveable { mutableStateOf(false) }
+    var menuExpanded by remember { mutableStateOf(false) }
 
     // search results from ViewModel
     val searchResults = viewModel.searchResults.collectAsState()
@@ -101,79 +109,158 @@ fun SearchTopBar(
                         }
                     },
                     trailingIcon = {
-                        IconButton(onClick = { /* TODO: open menu */ }) {
-                            Icon(
-                                Icons.Default.MoreVert,
-                                contentDescription = "Menu"
-                            )
-                        }
+                        SettingsMenu(
+                            expanded = menuExpanded,
+                            onExpandedChange = { menuExpanded = it }
+                        )
                     }
                 )
             },
             expanded = expanded,
             onExpandedChange = { expanded = it }
         ) {
-            // Display search results or favorite cities
-            if (isSearching.value) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Searching...", style = MaterialTheme.typography.bodyMedium)
+            SearchResultsContent(
+                isSearching = isSearching.value,
+                searchResults = searchResults.value,
+                query = query,
+                favoriteCities = favoriteCities,
+                onCitySelected = { city ->
+                    query = ""
+                    expanded = false
+                    viewModel.setCurrentCity(city)
+                    viewModel.clearSearchResults()
                 }
-            } else {
-                // Determine which cities to display
-                val citiesToDisplay = if (searchResults.value.isEmpty() && query.isBlank()) {
-                    favoriteCities
-                } else {
-                    searchResults.value
-                }
+            )
+        }
+    }
+}
 
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    if (searchResults.value.isEmpty() && query.isBlank()) {
-                        item {
-                            Text(
-                                text = "Favorite Cities",
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                        }
-                    }
-                    items(citiesToDisplay) { city ->
-                        Card(
-                            shape = MaterialTheme.shapes.extraLarge,
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    query = ""
-                                    expanded = false
-                                    viewModel.setCurrentCity(city)
-                                    viewModel.clearSearchResults()
-                                }
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            ) {
-                                Text(
-                                    text = city.name,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-                    }
-                }
+@Composable
+private fun SearchResultsContent(
+    isSearching: Boolean,
+    searchResults: List<City>,
+    query: String,
+    favoriteCities: List<City>,
+    onCitySelected: (City) -> Unit
+) {
+    if (isSearching) {
+        LoadingIndicator()
+    } else {
+        val citiesToDisplay = if (searchResults.isEmpty() && query.isBlank()) {
+            favoriteCities
+        } else {
+            searchResults
+        }
+
+        val showFavoriteTitle = searchResults.isEmpty() && query.isBlank()
+
+        CityList(
+            cities = citiesToDisplay,
+            showFavoriteTitle = showFavoriteTitle,
+            onCitySelected = onCitySelected
+        )
+    }
+}
+
+@Composable
+private fun LoadingIndicator() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text("Searching...", style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+private fun CityList(
+    cities: List<City>,
+    showFavoriteTitle: Boolean,
+    onCitySelected: (City) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        if (showFavoriteTitle) {
+            item {
+                Text(
+                    text = "Favorite Cities",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
             }
+        }
+
+        items(cities) { city ->
+            CityCard(
+                city = city,
+                onClick = { onCitySelected(city) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun CityCard(
+    city: City,
+    onClick: () -> Unit
+) {
+    Card(
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = city.name,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsMenu(
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit
+) {
+    Box {
+        IconButton(onClick = { onExpandedChange(true) }) {
+            Icon(
+                Icons.Default.MoreVert,
+                contentDescription = "Menu"
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) }
+        ) {
+            DropdownMenuItem(
+                text = { Text("Celsius (°C)") },
+                onClick = {
+                    // TODO: set temperature unit to Celsius
+                    onExpandedChange(false)
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("Fahrenheit (°F)") },
+                onClick = {
+                    // TODO: set temperature unit to Fahrenheit
+                    onExpandedChange(false)
+                }
+            )
         }
     }
 }
