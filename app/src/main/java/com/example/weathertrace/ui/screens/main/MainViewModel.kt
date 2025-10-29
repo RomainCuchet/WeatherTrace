@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weathertrace.domain.model.City
 import com.example.weathertrace.domain.repository.CityRepository
-import com.example.weathertrace.domain.repository.WeatherRepository
+//import com.example.weathertrace.domain.repository.WeatherRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +17,7 @@ class MainViewModel(
 ) : ViewModel() {
 
     private val cityRepository = CityRepository(devMode = devMode)
-    private val weatherRepository = WeatherRepository(devMode = devMode)
+//    private val weatherRepository = WeatherRepository(devMode = devMode)
 
 //    private val _uiState = MutableStateFlow<MainUiState>(MainUiState.Loading)
 //    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
@@ -31,6 +31,17 @@ class MainViewModel(
 
     private var lastSearchTime = 0L
     private var searchJob: Job? = null
+
+    private var _currentCity = MutableStateFlow<City?>(null)
+    val currentCity: StateFlow<City?> = _currentCity.asStateFlow()
+
+
+    /**
+     * Set current city
+     */
+    fun setCurrentCity(city: City) {
+        _currentCity.value = city
+    }
 
     /**
      * Search for cities with minimum 1 second delay between requests

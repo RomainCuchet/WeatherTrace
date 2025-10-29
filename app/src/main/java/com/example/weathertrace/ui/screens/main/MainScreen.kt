@@ -13,6 +13,8 @@ import com.example.weathertrace.ui.components.SearchTopBar
 fun MainScreen(
     viewModel: MainViewModel
 ) {
+    val currentCity = viewModel.currentCity.collectAsState()
+
     Scaffold(
         topBar = { SearchTopBar(viewModel = viewModel) },
         modifier = Modifier.fillMaxSize()
@@ -23,10 +25,20 @@ fun MainScreen(
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Hello WeatherTrace!",
-                style = MaterialTheme.typography.headlineMedium
-            )
+
+            Column {
+                Text(
+                    text = currentCity.value?.name ?: "Hello WeatherTrace!",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                if (currentCity.value != null) {
+                    Text(
+                        text = "${currentCity.value?.lat }, ${currentCity.value?.lon}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         }
     }
 }

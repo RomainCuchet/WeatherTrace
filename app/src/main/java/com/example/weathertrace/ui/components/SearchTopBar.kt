@@ -118,7 +118,7 @@ fun SearchTopBar(
                                 .clickable {
                                     query = ""
                                     expanded = false
-                                    // TODO: load weather data for selected city
+                                    viewModel.setCurrentCity(city)
                                 }
                                 .fillMaxWidth()
                         )
@@ -128,5 +128,3 @@ fun SearchTopBar(
         }
     }
 }
-
-// Preview removed - requires ViewModel instance
