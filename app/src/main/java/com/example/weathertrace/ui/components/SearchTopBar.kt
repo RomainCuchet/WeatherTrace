@@ -1,16 +1,22 @@
 package com.example.weathertrace.ui.components
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -23,6 +29,7 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
+import com.example.weathertrace.domain.model.City
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +42,16 @@ fun SearchTopBar(
     // search results from ViewModel
     val searchResults = viewModel.searchResults.collectAsState()
     val isSearching = viewModel.isSearching.collectAsState()
+
+    // mock
+    // TODO: get favorite cities from database
+    val favoriteCities = listOf<City>(
+        City(name = "Paris", lat = 48.8566, lon = 2.3522),
+        City(name = "London", lat = 51.5074, lon = -0.1278),
+        City(name = "New York", lat = 40.7128, lon = -74.0060),
+        City(name = "Tokyo", lat = 35.6895, lon = 139.6917),
+        City(name = "Sydney", lat = -33.8688, lon = 151.2093),
+    )
 
     Box(
         modifier = Modifier
@@ -69,6 +86,7 @@ fun SearchTopBar(
                             IconButton(onClick = {
                                 expanded = false
                                 query = ""
+                                viewModel.clearSearchResults()
                             }) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.ArrowBack,
@@ -95,7 +113,7 @@ fun SearchTopBar(
             expanded = expanded,
             onExpandedChange = { expanded = it }
         ) {
-            // Display search results
+            // Display search results or favorite cities
             if (isSearching.value) {
                 Box(
                     modifier = Modifier
@@ -106,22 +124,53 @@ fun SearchTopBar(
                     Text("Searching...", style = MaterialTheme.typography.bodyMedium)
                 }
             } else {
+                // Determine which cities to display
+                val citiesToDisplay = if (searchResults.value.isEmpty() && query.isBlank()) {
+                    favoriteCities
+                } else {
+                    searchResults.value
+                }
+
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    items(searchResults.value) { city ->
-                        ListItem(
-                            headlineContent = { Text(city.name) },
+                    if (searchResults.value.isEmpty() && query.isBlank()) {
+                        item {
+                            Text(
+                                text = "Favorite Cities",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                    }
+                    items(citiesToDisplay) { city ->
+                        Card(
+                            shape = MaterialTheme.shapes.extraLarge,
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            ),
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .clickable {
                                     query = ""
                                     expanded = false
                                     viewModel.setCurrentCity(city)
+                                    viewModel.clearSearchResults()
                                 }
-                                .fillMaxWidth()
-                        )
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = city.name,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
                     }
                 }
             }

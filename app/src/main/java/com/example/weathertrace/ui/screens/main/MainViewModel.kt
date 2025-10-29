@@ -76,5 +76,9 @@ class MainViewModel(
         }
     }
 
+    fun clearSearchResults() {
+        _searchResults.value = emptyList()
+    }
+
 
 }
