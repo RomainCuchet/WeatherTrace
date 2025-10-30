@@ -143,17 +143,18 @@ private fun SearchResultsContent(
     favoriteCities: List<City>,
     onCitySelected: (City) -> Unit
 ) {
-    if (isSearching) {
+    val citiesToDisplay = if (searchResults.isEmpty() && query.isBlank()) {
+        favoriteCities
+    } else {
+        searchResults
+    }
+
+    val showFavoriteTitle = searchResults.isEmpty() && query.isBlank()
+
+    // Show loading only if no results yet
+    if (isSearching && searchResults.isEmpty() && query.isNotBlank()) {
         LoadingIndicator()
     } else {
-        val citiesToDisplay = if (searchResults.isEmpty() && query.isBlank()) {
-            favoriteCities
-        } else {
-            searchResults
-        }
-
-        val showFavoriteTitle = searchResults.isEmpty() && query.isBlank()
-
         CityList(
             cities = citiesToDisplay,
             showFavoriteTitle = showFavoriteTitle,

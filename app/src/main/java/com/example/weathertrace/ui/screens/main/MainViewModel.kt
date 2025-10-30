@@ -51,6 +51,7 @@ class MainViewModel(
 
         if (query.isBlank()) {
             _searchResults.value = emptyList()
+            _isSearching.value = false
             return
         }
 
@@ -69,7 +70,7 @@ class MainViewModel(
                 _searchResults.value = results
             } catch (e: Exception) {
                 e.printStackTrace()
-                _searchResults.value = emptyList()
+                // Don't clear results on error, keep previous results
             } finally {
                 _isSearching.value = false
             }
