@@ -5,22 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
+
 import com.example.weathertrace.ui.screens.main.MainScreen
 import com.example.weathertrace.ui.screens.main.MainViewModel
-//import androidx.compose.foundation.clickable
-//import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.lazy.LazyColumn
-//import androidx.compose.foundation.lazy.items
-//import androidx.compose.material3.*
-//import androidx.compose.runtime.*
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.unit.dp
+import com.example.weathertrace.ui.screens.main.MainViewModelFactory
+
 //import com.example.weathertrace.domain.model.City
 //import com.example.weathertrace.domain.model.DailyWeatherModel
 //import com.example.weathertrace.domain.repository.CityRepository
 //import com.example.weathertrace.domain.repository.WeatherRepository
-//import kotlinx.coroutines.launch
-//import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
 
@@ -35,9 +28,11 @@ class MainActivity : ComponentActivity() {
             println("⚙️ Dev Mode activated: using mocked data")
         }
 
-        val viewModel = MainViewModel(devMode = BuildConfig.DEV_MODE)
 
         setContent {
+            val viewModel: MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                factory = MainViewModelFactory(BuildConfig.DEV_MODE)
+            )
             MaterialTheme {
                 MainScreen(viewModel = viewModel)
             }
