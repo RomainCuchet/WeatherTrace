@@ -12,10 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.launchIn
 import java.time.LocalDate
 import com.example.weathertrace.BuildConfig
 
@@ -23,14 +19,21 @@ class MainViewModel(
     devMode: Boolean
 ) : ViewModel() {
 
+
     private val cityRepository = CityRepository(devMode = devMode)
     private val weatherRepository = WeatherRepository(devMode = devMode)
 
     private val _searchResultsCity = MutableStateFlow<List<City>>(emptyList())
     val searchResultsCity: StateFlow<List<City>> = _searchResultsCity.asStateFlow()
 
-    private val _searchResultsWeather = MutableStateFlow<List<DailyWeatherModel>>(emptyList())
-    val searchResultsWeather: StateFlow<List<DailyWeatherModel>> = _searchResultsWeather.asStateFlow()
+    private val _currentResultsWeather = MutableStateFlow<List<DailyWeatherModel>>(emptyList())
+    val currentResultsWeather: StateFlow<List<DailyWeatherModel>> = _currentResultsWeather.asStateFlow()
+
+    private var _currentTemps : List<Double> = emptyList()
+    private var _currentYears = MutableStateFlow<List<Int>>(emptyList())
+    val currentYears = _currentYears.asStateFlow()
+    private val _currentProcessedTemps = MutableStateFlow<List<Double>>(emptyList())
+    val currentProcessedTemps = _currentProcessedTemps.asStateFlow()
 
     private val _isSearchingCity = MutableStateFlow(false)
     private val _isSearchingWeather = MutableStateFlow(false)
@@ -42,15 +45,49 @@ class MainViewModel(
 
     private var lastSearchTimeCity = 0L
     private var searchJobCity: Job? = null
-
+    private var fetchJobWeather: Job? = null
     private val _currentCity = MutableStateFlow<City?>(null)
     val currentCity: StateFlow<City?> = _currentCity.asStateFlow()
+
+
+    private val _currentTemperatureUnit = MutableStateFlow<String>("F")
+    val currentTemperatureUnit = _currentTemperatureUnit.asStateFlow()
+    private val availableTemperatureUnit = arrayOf("C", "F")
+
+
+    fun setTemperatureUnit(newTemperatureUnit: String){
+        println("activate temp")
+        if(newTemperatureUnit != _currentTemperatureUnit.value && availableTemperatureUnit.contains(newTemperatureUnit)){
+            _currentTemperatureUnit.value = newTemperatureUnit
+            _currentProcessedTemps.value = convertTemperatures(_currentTemps, _currentTemperatureUnit.value)
+        }
+    }
+
+    fun convertTemperatures(
+        temperaturesInKelvin: List<Double>,
+        targetUnit: String
+    ): List<Double> {
+        return temperaturesInKelvin.map { kelvin ->
+            when (targetUnit.uppercase()) {
+                "C" -> kelvin - 273.15
+                "F" -> (kelvin - 273.15) * 9/5 + 32
+                else -> kelvin
+            }
+        }
+    }
 
     /**
      * Set current city
      */
     fun setCurrentCity(city: City) {
-        _currentCity.value = city
+        if(city!=_currentCity.value){
+            fetchJobWeather?.cancel()
+            _currentCity.value = city
+
+            fetchJobWeather = viewModelScope.launch{
+                fetchHistoricalDailyWeathers(city)
+            }
+        }
     }
 
     /**
@@ -95,13 +132,17 @@ class MainViewModel(
         city?.let { city ->
             try {
                 _isSearchingWeather.value = true
-                _searchResultsWeather.value = weatherRepository.getHistoricalDailyWeathers(
+                _currentResultsWeather.value = weatherRepository.getHistoricalDailyWeathers(
                     city.lat,
                     city.lon,
                     LocalDate.now(),
                     apiKey = BuildConfig.OPENWEATHER_API_KEY
                 )
                 _isErrorFetchingWeather.value = false
+                val (years, maxTemps) = processHistoricalDailyWeathers(_currentResultsWeather.value)
+                _currentTemps = maxTemps
+                _currentYears.value = years
+                _currentProcessedTemps.value = convertTemperatures(_currentTemps,_currentTemperatureUnit.value)
                 println("Fetched data weather")
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -112,7 +153,22 @@ class MainViewModel(
         }
     }
 
-    fun clearSearchResults() {
+    fun processHistoricalDailyWeathers(dailyWeather: List<DailyWeatherModel>): Pair<List<Int>, List<Double>> {
+        val sorted = dailyWeather.sortedBy { it.date }
+
+        val years = sorted.map { it.date.year }
+        val maxTemperatures = sorted.map { it.temperature.max }
+
+        return years to maxTemperatures
+    }
+
+    fun clearSearchResultsCity() {
         _searchResultsCity.value = emptyList()
+    }
+
+    // TODO: Camille replace mock data with the current city using device position if available
+    init {
+        setCurrentCity(City("Paris",48.85566, 2.3522))
+
     }
 }

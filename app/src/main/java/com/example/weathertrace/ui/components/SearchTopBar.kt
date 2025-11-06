@@ -36,12 +36,13 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
+import com.example.weathertrace.ui.screens.main.MainViewModel
 import com.example.weathertrace.domain.model.City
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SearchTopBar(
-    viewModel: com.example.weathertrace.ui.screens.main.MainViewModel
+    viewModel: MainViewModel
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -94,7 +95,7 @@ fun SearchTopBar(
                             IconButton(onClick = {
                                 expanded = false
                                 query = ""
-                                viewModel.clearSearchResults()
+                                viewModel.clearSearchResultsCity()
                             }) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.ArrowBack,
@@ -111,7 +112,8 @@ fun SearchTopBar(
                     trailingIcon = {
                         SettingsMenu(
                             expanded = menuExpanded,
-                            onExpandedChange = { menuExpanded = it }
+                            onExpandedChange = { menuExpanded = it },
+                            viewModel = viewModel
                         )
                     }
                 )
@@ -128,7 +130,7 @@ fun SearchTopBar(
                     query = ""
                     expanded = false
                     viewModel.setCurrentCity(city)
-                    viewModel.clearSearchResults()
+                    viewModel.clearSearchResultsCity()
                 }
             )
         }
@@ -235,7 +237,8 @@ private fun CityCard(
 @Composable
 private fun SettingsMenu(
     expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit
+    onExpandedChange: (Boolean) -> Unit,
+    viewModel: MainViewModel
 ) {
     Box {
         IconButton(onClick = { onExpandedChange(true) }) {
@@ -251,14 +254,14 @@ private fun SettingsMenu(
             DropdownMenuItem(
                 text = { Text("Celsius (°C)") },
                 onClick = {
-                    // TODO: set temperature unit to Celsius
+                    viewModel.setTemperatureUnit("C")
                     onExpandedChange(false)
                 }
             )
             DropdownMenuItem(
                 text = { Text("Fahrenheit (°F)") },
                 onClick = {
-                    // TODO: set temperature unit to Fahrenheit
+                    viewModel.setTemperatureUnit("F")
                     onExpandedChange(false)
                 }
             )

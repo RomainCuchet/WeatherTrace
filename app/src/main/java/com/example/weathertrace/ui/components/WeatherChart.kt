@@ -32,28 +32,44 @@ import androidx.compose.ui.graphics.toArgb
 import com.patrykandpatrick.vico.core.common.Fill
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.core.cartesian.Zoom
+import com.example.weathertrace.ui.screens.main.MainViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
 import android.graphics.Path
 import com.patrykandpatrick.vico.core.common.MeasuringContext
 
 @Composable
-fun WeatherChart() {
-    val temps = listOf(7.3f, 8.7f, 12.1f, 6.9f, 20.3f, 22.8f, 21.0f, 24.9f,7.3f, 8.7f, 12.1f, 6.9f, 20.3f, 22.8f, 21.0f, 24.9f,7.3f, 8.7f, 12.1f, 6.9f, 20.3f, 22.8f, 21.0f, 24.9f)
-    val years = listOf(2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022,2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022,2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022)
+fun WeatherChart(viewModel: MainViewModel) {
+    val temps = viewModel.currentProcessedTemps.collectAsState()
+    val years = viewModel.currentYears.collectAsState()
+    val isSearchingWeather = viewModel.isSearchingWeather.collectAsState()
+
+    if (isSearchingWeather.value || temps.value.isEmpty() || years.value.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(320.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Loading weather data...", style = MaterialTheme.typography.bodyMedium)
+        }
+        return
+    }
 
     val modelProducer = remember { CartesianChartModelProducer() }
 
-
-    LaunchedEffect(Unit) {
+    LaunchedEffect(temps.value) {
         modelProducer.runTransaction {
-            lineSeries { series(temps) }
+            lineSeries { series(temps.value) }
         }
     }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(vertical = 16.dp)
     ) {
         Text(
             text = "Évolution annuelle des températures 🌡️",
@@ -62,9 +78,7 @@ fun WeatherChart() {
         )
 
         val line = LineCartesianLayer.Line(
-            fill = LineCartesianLayer.LineFill.single(
-                Fill(Color(0xFF6200EE).toArgb()) // ligne violette
-            ),
+            fill = LineCartesianLayer.LineFill.single(Fill(Color(0xFF6200EE).toArgb())),
             thicknessDp = 1.4f,
             pointProvider = LineCartesianLayer.PointProvider.single(
                 point = LineCartesianLayer.Point(
@@ -79,58 +93,38 @@ fun WeatherChart() {
             )
         )
 
-
         val lineProvider = LineCartesianLayer.LineProvider.series(listOf(line))
+        val currentUnit = viewModel.currentTemperatureUnit.collectAsState()
 
         val startAxis = rememberStartAxis(
-            label = rememberTextComponent(
-                color = Color.Black,
-                padding = Dimensions.of(horizontal = 8.dp)
-            ),
-            title = "Temperature (°C)", //TODO: switch to the used metric
-            titleComponent = rememberTextComponent(
-                color = Color.Black,
-                padding = Dimensions.of(horizontal = 4.dp, vertical = 8.dp)
-            ),
-            guideline = null,
-            itemPlacer = remember {
-                com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis.ItemPlacer.step(
-                    step = { 5.0 }
-                )
-            }
+            label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 8.dp)),
+            title = "Temperature (°${currentUnit.value})",
+            titleComponent = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 4.dp, vertical = 8.dp)),
+            guideline = null
         )
 
         val bottomAxis = rememberBottomAxis(
-            label = rememberTextComponent(
-                color = Color.Black,
-                padding = Dimensions.of(vertical = 8.dp)
-            ),
-            title = "Year ${years.first()} ➔ ${years.last()}",
-            titleComponent = rememberTextComponent(
-                color = Color.Black,
-                padding = Dimensions.of(horizontal = 4.dp, vertical = 8.dp)
-            ),
+            label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(vertical = 8.dp)),
+            title = "Year ${years.value.first()} ➔ ${years.value.last()}",
+            titleComponent = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 4.dp, vertical = 8.dp)),
             guideline = null,
             valueFormatter = { value, _, _ ->
                 val index = value.toInt()
-                if (index in years.indices) years[index].toString() else ""
+                if (index in years.value.indices) years.value[index].toString() else ""
             }
         )
 
         val zoomState = rememberVicoZoomState(
             zoomEnabled = true,
-            initialZoom = Zoom.Content, // By default zoom is set to respect label constraint
+            initialZoom = Zoom.Content,
             minZoom = Zoom.Content,
         )
 
         CartesianChartHost(
             chart = rememberCartesianChart(
-                rememberLineCartesianLayer(
-                    lineProvider = lineProvider
-                ),
+                rememberLineCartesianLayer(lineProvider = lineProvider),
                 startAxis = startAxis,
                 bottomAxis = bottomAxis
-
             ),
             modelProducer = modelProducer,
             zoomState = zoomState,

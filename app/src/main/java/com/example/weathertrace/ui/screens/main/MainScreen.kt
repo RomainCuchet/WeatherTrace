@@ -49,7 +49,7 @@ fun MainScreen(
                 }
             }
 
-            WeatherChart()
+            WeatherChart(viewModel)
         }
     }
 }
