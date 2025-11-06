@@ -48,8 +48,8 @@ fun SearchTopBar(
     var menuExpanded by remember { mutableStateOf(false) }
 
     // search results from ViewModel
-    val searchResults = viewModel.searchResults.collectAsState()
-    val isSearching = viewModel.isSearching.collectAsState()
+    val searchResults = viewModel.searchResultsCity.collectAsState()
+    val isSearching = viewModel.isSearchingCity.collectAsState()
 
     // mock
     // TODO: get favorite cities from database

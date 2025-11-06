@@ -8,6 +8,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.*
 import com.example.weathertrace.ui.components.SearchTopBar
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Surface
+import com.example.weathertrace.ui.components.WeatherChart
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun MainScreen(
@@ -19,14 +24,18 @@ fun MainScreen(
         topBar = { SearchTopBar(viewModel = viewModel) },
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
+                .padding(innerPadding)
+                .padding(16.dp) // padding interne
         ) {
-
-            Column {
+            // Texte en haut
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            ) {
                 Text(
                     text = currentCity.value?.name ?: "Hello WeatherTrace!",
                     style = MaterialTheme.typography.bodyMedium
@@ -34,11 +43,13 @@ fun MainScreen(
 
                 if (currentCity.value != null) {
                     Text(
-                        text = "${currentCity.value?.lat }, ${currentCity.value?.lon}",
+                        text = "${currentCity.value?.lat}, ${currentCity.value?.lon}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
+
+            WeatherChart()
         }
     }
 }

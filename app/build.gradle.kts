@@ -78,6 +78,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
+    // --- Vico Charts ---
+    implementation("com.patrykandpatrick.vico:compose:2.0.0-alpha.28")
+    implementation("com.patrykandpatrick.vico:compose-m3:2.0.0-alpha.28")
+    implementation("com.patrykandpatrick.vico:core:2.0.0-alpha.28")
+
     // --- Tests ---
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
