@@ -33,12 +33,16 @@ import com.patrykandpatrick.vico.core.common.Fill
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.core.cartesian.Zoom
 
+import android.graphics.Path
+import com.patrykandpatrick.vico.core.common.MeasuringContext
+
 @Composable
 fun WeatherChart() {
     val temps = listOf(7.3f, 8.7f, 12.1f, 6.9f, 20.3f, 22.8f, 21.0f, 24.9f,7.3f, 8.7f, 12.1f, 6.9f, 20.3f, 22.8f, 21.0f, 24.9f,7.3f, 8.7f, 12.1f, 6.9f, 20.3f, 22.8f, 21.0f, 24.9f)
     val years = listOf(2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022,2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022,2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022)
 
     val modelProducer = remember { CartesianChartModelProducer() }
+
 
     LaunchedEffect(Unit) {
         modelProducer.runTransaction {
@@ -59,21 +63,22 @@ fun WeatherChart() {
 
         val line = LineCartesianLayer.Line(
             fill = LineCartesianLayer.LineFill.single(
-                Fill(Color(0xFF6200EE).toArgb())
+                Fill(Color(0xFF6200EE).toArgb()) // ligne violette
             ),
-            thicknessDp = 3f,
+            thicknessDp = 1.4f,
             pointProvider = LineCartesianLayer.PointProvider.single(
                 point = LineCartesianLayer.Point(
                     component = rememberShapeComponent(
                         shape = Shape.rounded(allPercent = 50),
-                        color = Color(0xFFFF5722),
+                        color = Color(0xFF6200EE),
                         strokeColor = Color.White,
-                        strokeThickness = 2.dp
+                        strokeThickness = 0.5.dp
                     ),
-                    sizeDp = 10f
+                    sizeDp = 6f
                 )
             )
         )
+
 
         val lineProvider = LineCartesianLayer.LineProvider.series(listOf(line))
 
@@ -100,7 +105,7 @@ fun WeatherChart() {
                 color = Color.Black,
                 padding = Dimensions.of(vertical = 8.dp)
             ),
-            title = "Années",
+            title = "Year ${years.first()} ➔ ${years.last()}",
             titleComponent = rememberTextComponent(
                 color = Color.Black,
                 padding = Dimensions.of(horizontal = 4.dp, vertical = 8.dp)
