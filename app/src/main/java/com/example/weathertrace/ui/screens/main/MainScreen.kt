@@ -4,13 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.*
 import com.example.weathertrace.ui.components.SearchTopBar
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Surface
 import com.example.weathertrace.ui.components.WeatherChart
 import androidx.compose.ui.unit.dp
 

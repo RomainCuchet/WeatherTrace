@@ -12,8 +12,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.text.style.TextAlign
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLabelComponent
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
@@ -21,24 +30,18 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.of
-import com.patrykandpatrick.vico.compose.common.shape.rounded
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.common.Dimensions
 import com.patrykandpatrick.vico.core.common.shape.Shape
-import androidx.core.graphics.toColorInt
-import androidx.compose.ui.graphics.toArgb
-import com.patrykandpatrick.vico.core.common.Fill
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.core.cartesian.Zoom
-import com.example.weathertrace.ui.screens.main.MainViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.Alignment
+import com.patrykandpatrick.vico.core.common.Fill
 
-import android.graphics.Path
-import com.patrykandpatrick.vico.core.common.MeasuringContext
+import com.example.weathertrace.ui.screens.main.MainViewModel
+
+val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH)
 
 @Composable
 fun WeatherChart(viewModel: MainViewModel) {
@@ -72,9 +75,12 @@ fun WeatherChart(viewModel: MainViewModel) {
             .padding(vertical = 16.dp)
     ) {
         Text(
-            text = "Évolution annuelle des températures 🌡️",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(bottom = 16.dp)
+            text = "${LocalDate.now().format(formatter)} throughout the years 🌡️",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            textAlign = TextAlign.Center,
         )
 
         val line = LineCartesianLayer.Line(
@@ -97,16 +103,16 @@ fun WeatherChart(viewModel: MainViewModel) {
         val currentUnit = viewModel.currentTemperatureUnit.collectAsState()
 
         val startAxis = rememberStartAxis(
-            label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 8.dp)),
+            label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 2.dp)),
             title = "Temperature (°${currentUnit.value})",
             titleComponent = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 4.dp, vertical = 8.dp)),
             guideline = null
         )
 
         val bottomAxis = rememberBottomAxis(
-            label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(vertical = 8.dp)),
+            label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(vertical = 2.dp)),
             title = "Year ${years.value.first()} ➔ ${years.value.last()}",
-            titleComponent = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 4.dp, vertical = 8.dp)),
+            titleComponent = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 4.dp, vertical = 2.dp)),
             guideline = null,
             valueFormatter = { value, _, _ ->
                 val index = value.toInt()
