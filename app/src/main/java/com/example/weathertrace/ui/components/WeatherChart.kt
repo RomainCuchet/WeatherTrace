@@ -30,6 +30,8 @@ import com.patrykandpatrick.vico.core.common.shape.Shape
 import androidx.core.graphics.toColorInt
 import androidx.compose.ui.graphics.toArgb
 import com.patrykandpatrick.vico.core.common.Fill
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import com.patrykandpatrick.vico.core.cartesian.Zoom
 
 @Composable
 fun WeatherChart() {
@@ -110,6 +112,12 @@ fun WeatherChart() {
             }
         )
 
+        val zoomState = rememberVicoZoomState(
+            zoomEnabled = true,
+            initialZoom = Zoom.Content, // By default zoom is set to respect label constraint
+            minZoom = Zoom.Content,
+        )
+
         CartesianChartHost(
             chart = rememberCartesianChart(
                 rememberLineCartesianLayer(
@@ -117,8 +125,10 @@ fun WeatherChart() {
                 ),
                 startAxis = startAxis,
                 bottomAxis = bottomAxis
+
             ),
             modelProducer = modelProducer,
+            zoomState = zoomState,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(320.dp)
