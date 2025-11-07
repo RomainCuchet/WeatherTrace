@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.safeDrawingPadding
+import com.example.weathertrace.ui.components.ComeBackArrow
 
 
 import com.example.weathertrace.ui.screens.main.MainViewModel
@@ -29,19 +30,7 @@ fun SettingsScreen(
             .safeDrawingPadding()
             .padding(horizontal = 16.dp)
     ) {
-        // Header with comme back button
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-            }
-            Text("Settings", style = MaterialTheme.typography.headlineSmall)
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+        ComeBackArrow(title = "Settings", navController = navController)
 
         Text("Temperature Unit", style = MaterialTheme.typography.titleMedium)
 

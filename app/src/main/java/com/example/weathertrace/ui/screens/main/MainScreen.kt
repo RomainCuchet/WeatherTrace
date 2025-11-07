@@ -30,38 +30,7 @@ fun MainScreen(viewModel: MainViewModel) {
         startDestination = "home"
     ) {
         composable("home") {
-            Scaffold(
-                topBar = { SearchTopBar(viewModel = viewModel, navController = navController) },
-                modifier = Modifier.fillMaxSize()
-            ) { innerPadding ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(16.dp)
-                ) {
-                    // Current city text
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    ) {
-                        Text(
-                            text = currentCity?.name ?: "Hello WeatherTrace!",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        currentCity?.let {
-                            Text(
-                                text = "${it.lat}, ${it.lon}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-
-                    // Weather Graph
-                    WeatherChart(viewModel)
-                }
-            }
+            HomeScreen(viewModel, navController)
         }
 
         // ReadMeDocScreen

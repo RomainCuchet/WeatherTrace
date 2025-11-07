@@ -9,12 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import java.io.IOException
@@ -48,19 +42,7 @@ fun ReadMeDocScreen(navController: NavController) {
             .padding(horizontal = 16.dp)
             .verticalScroll(scrollState)
     ) {
-        // Header with comme back button
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-            }
-            Text("Settings", style = MaterialTheme.typography.headlineSmall)
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+        ComeBackArrow(title = "Doc", navController = navController)
 
         Markdown(
             content = markdownText,
