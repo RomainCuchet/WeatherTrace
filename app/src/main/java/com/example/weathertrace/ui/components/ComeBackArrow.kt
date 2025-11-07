@@ -1,0 +1,37 @@
+package com.example.weathertrace.ui.components
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+
+@Composable
+fun ComeBackArrow(
+    title: String,
+    navController: NavController,
+    onClick: (() -> Unit)? = null
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        IconButton(
+            onClick = { onClick?.invoke() ?: navController.popBackStack() }
+        ) {
+            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(title, style = MaterialTheme.typography.headlineSmall)
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+}
