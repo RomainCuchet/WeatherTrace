@@ -38,11 +38,14 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import com.example.weathertrace.ui.screens.main.MainViewModel
 import com.example.weathertrace.domain.model.City
+import androidx.navigation.NavController
+import kotlin.math.truncate
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SearchTopBar(
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    navController: NavController
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -113,7 +116,8 @@ fun SearchTopBar(
                         SettingsMenu(
                             expanded = menuExpanded,
                             onExpandedChange = { menuExpanded = it },
-                            viewModel = viewModel
+                            viewModel = viewModel,
+                            navController = navController
                         )
                     }
                 )
@@ -238,7 +242,9 @@ private fun CityCard(
 private fun SettingsMenu(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    navController: NavController
+
 ) {
     Box {
         IconButton(onClick = { onExpandedChange(true) }) {
@@ -251,18 +257,32 @@ private fun SettingsMenu(
             expanded = expanded,
             onDismissRequest = { onExpandedChange(false) }
         ) {
+//            DropdownMenuItem(
+//                text = { Text("Celsius (°C)") },
+//                onClick = {
+//                    viewModel.setTemperatureUnit("C")
+//                    onExpandedChange(false)
+//                }
+//            )
+//            DropdownMenuItem(
+//                text = { Text("Fahrenheit (°F)") },
+//                onClick = {
+//                    viewModel.setTemperatureUnit("F")
+//                    onExpandedChange(false)
+//                }
+//            )
+
             DropdownMenuItem(
-                text = { Text("Celsius (°C)") },
+                { Text("Settings") },
                 onClick = {
-                    viewModel.setTemperatureUnit("C")
-                    onExpandedChange(false)
+                    navController.navigate("settingsScreen")
                 }
             )
+
             DropdownMenuItem(
-                text = { Text("Fahrenheit (°F)") },
+                text = { Text("Doc") },
                 onClick = {
-                    viewModel.setTemperatureUnit("F")
-                    onExpandedChange(false)
+                    navController.navigate("readmeScreen")
                 }
             )
         }

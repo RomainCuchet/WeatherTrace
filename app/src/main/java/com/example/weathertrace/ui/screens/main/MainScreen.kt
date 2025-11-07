@@ -6,46 +6,71 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.NavHost
+import androidx.compose.runtime.Composable
+import androidx.navigation.compose.composable
+
 import com.example.weathertrace.ui.components.SearchTopBar
 import com.example.weathertrace.ui.components.WeatherChart
-import androidx.compose.ui.unit.dp
+import com.example.weathertrace.ui.components.ReadMeDocScreen
+
+
+
 
 @Composable
-fun MainScreen(
-    viewModel: MainViewModel
-) {
-    val currentCity = viewModel.currentCity.collectAsState()
+fun MainScreen(viewModel: MainViewModel) {
 
-    Scaffold(
-        topBar = { SearchTopBar(viewModel = viewModel) },
-        modifier = Modifier.fillMaxSize()
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp) // padding interne
-        ) {
-            // Texte en haut
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = currentCity.value?.name ?: "Hello WeatherTrace!",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+    val navController = rememberNavController()
+    val currentCity by viewModel.currentCity.collectAsState()
 
-                if (currentCity.value != null) {
-                    Text(
-                        text = "${currentCity.value?.lat}, ${currentCity.value?.lon}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+    NavHost(
+        navController = navController,
+        startDestination = "home"
+    ) {
+        composable("home") {
+            Scaffold(
+                topBar = { SearchTopBar(viewModel = viewModel, navController = navController) },
+                modifier = Modifier.fillMaxSize()
+            ) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(16.dp)
+                ) {
+                    // Current city text
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    ) {
+                        Text(
+                            text = currentCity?.name ?: "Hello WeatherTrace!",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        currentCity?.let {
+                            Text(
+                                text = "${it.lat}, ${it.lon}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+
+                    // Weather Graph
+                    WeatherChart(viewModel)
                 }
             }
+        }
 
-            WeatherChart(viewModel)
+        // ReadMeDocScreen
+        composable("readmeScreen") {
+            ReadMeDocScreen(navController)
+        }
+        // SettingsScreen
+        composable("settingsScreen"){
+            SettingsScreen(viewModel,navController)
         }
     }
 }
