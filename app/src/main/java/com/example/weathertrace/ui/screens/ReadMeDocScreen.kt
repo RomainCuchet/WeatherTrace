@@ -1,4 +1,4 @@
-package com.example.weathertrace.ui.components
+package com.example.weathertrace.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,6 +17,20 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 
+import com.example.weathertrace.ui.components.ComeBackArrow
+
+/**
+ * Displays the application's README documentation in Markdown format.
+ *
+ * This composable loads and renders the `README.md` file stored in the app's assets.
+ * If the file cannot be read, an error message is shown instead. The content is
+ * scrollable and styled using the current [MaterialTheme].
+ *
+ * A top navigation arrow allows returning to the previous screen.
+ *
+ * @param navController The [NavController] used for navigation within the app.
+ * @author Romain CUCHET
+ */
 @Composable
 fun ReadMeDocScreen(navController: NavController) {
     val context = LocalContext.current
@@ -28,10 +42,12 @@ fun ReadMeDocScreen(navController: NavController) {
                     .bufferedReader()
                     .use { it.readText() }
             } catch (e: IOException) {
-                "# ❌ Error\nImpossible to reload the documentation from README.md"
+                println("Error loading the README.md file: $e")
+                "# Error\nImpossible to load the documentation from README.md"
             }
         )
     }
+
 
     val scrollState = rememberScrollState()
 

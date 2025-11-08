@@ -36,10 +36,9 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
-import com.example.weathertrace.ui.screens.main.MainViewModel
+import com.example.weathertrace.viewModel.MainViewModel
 import com.example.weathertrace.domain.model.City
 import androidx.navigation.NavController
-import kotlin.math.truncate
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +53,7 @@ fun SearchTopBar(
     // search results from ViewModel
     val searchResults = viewModel.searchResultsCity.collectAsState()
     val isSearching = viewModel.isSearchingCity.collectAsState()
+    val isErrorSearchingCity = viewModel.isErrorSearchingCity.collectAsState()
 
     // mock
     // TODO: get favorite cities from database
@@ -127,6 +127,7 @@ fun SearchTopBar(
         ) {
             SearchResultsContent(
                 isSearching = isSearching.value,
+                isErrorSearchingCity = isErrorSearchingCity.value,
                 searchResults = searchResults.value,
                 query = query,
                 favoriteCities = favoriteCities,
@@ -144,6 +145,7 @@ fun SearchTopBar(
 @Composable
 private fun SearchResultsContent(
     isSearching: Boolean,
+    isErrorSearchingCity: Boolean,
     searchResults: List<City>,
     query: String,
     favoriteCities: List<City>,
@@ -157,9 +159,11 @@ private fun SearchResultsContent(
 
     val showFavoriteTitle = searchResults.isEmpty() && query.isBlank()
 
-    // Show loading only if no results yet
-    if (isSearching && searchResults.isEmpty() && query.isNotBlank()) {
-        LoadingIndicator()
+    if (isErrorSearchingCity && searchResults.isEmpty()){
+        Indicator("Error loading cities")
+    }
+    else if (isSearching && searchResults.isEmpty() && query.isNotBlank()) {
+        Indicator("Searching...")
     } else {
         CityList(
             cities = citiesToDisplay,
@@ -170,14 +174,14 @@ private fun SearchResultsContent(
 }
 
 @Composable
-private fun LoadingIndicator() {
+private fun Indicator(text : String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text("Searching...", style = MaterialTheme.typography.bodyMedium)
+        Text(text = text, style = MaterialTheme.typography.bodyMedium)
     }
 }
 

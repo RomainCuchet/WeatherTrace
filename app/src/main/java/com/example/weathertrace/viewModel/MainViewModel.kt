@@ -1,7 +1,8 @@
-package com.example.weathertrace.ui.screens.main
+package com.example.weathertrace.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weathertrace.BuildConfig
 import com.example.weathertrace.domain.model.City
 import com.example.weathertrace.domain.model.DailyWeatherModel
 import com.example.weathertrace.domain.repository.CityRepository
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import com.example.weathertrace.BuildConfig
 
 class MainViewModel(
     devMode: Boolean
@@ -30,18 +30,23 @@ class MainViewModel(
     val currentResultsWeather: StateFlow<List<DailyWeatherModel>> = _currentResultsWeather.asStateFlow()
 
     private var _currentTemps : List<Double> = emptyList()
-    private var _currentYears = MutableStateFlow<List<Int>>(emptyList())
-    val currentYears = _currentYears.asStateFlow()
     private val _currentProcessedTemps = MutableStateFlow<List<Double>>(emptyList())
     val currentProcessedTemps = _currentProcessedTemps.asStateFlow()
 
+    private var _currentYears = MutableStateFlow<List<Int>>(emptyList())
+    val currentYears = _currentYears.asStateFlow()
+
+
     private val _isSearchingCity = MutableStateFlow(false)
-    private val _isSearchingWeather = MutableStateFlow(false)
     val isSearchingCity: StateFlow<Boolean> = _isSearchingCity.asStateFlow()
+
+    private val _isSearchingWeather = MutableStateFlow(false)
     val isSearchingWeather: StateFlow<Boolean> = _isSearchingWeather.asStateFlow()
 
     private val _isErrorSearchingCity = MutableStateFlow(false)
+    val isErrorSearchingCity = _isErrorSearchingCity.asStateFlow()
     private val _isErrorFetchingWeather = MutableStateFlow(false)
+    val isErrorFetchingWeather = _isErrorFetchingWeather.asStateFlow()
 
     private var lastSearchTimeCity = 0L
     private var searchJobCity: Job? = null
@@ -54,7 +59,12 @@ class MainViewModel(
     val currentTemperatureUnit = _currentTemperatureUnit.asStateFlow()
     private val availableTemperatureUnit = arrayOf("C", "F")
 
-
+    /**
+     * set a new temperature unit
+     *
+     * @property newTemperatureUnit String must be listed as an available temperature unit to be set
+     * @author Romain CUCHET
+     */
     fun setTemperatureUnit(newTemperatureUnit: String){
         println("activate temp")
         if(newTemperatureUnit != _currentTemperatureUnit.value && availableTemperatureUnit.contains(newTemperatureUnit)){
@@ -77,14 +87,17 @@ class MainViewModel(
     }
 
     /**
-     * Set current city
+     * Set a new current city. If the changes then we fetch its historical weather data.
+     *
+     * @property city the new curent city
+     * @author Romain CUCHET
      */
     fun setCurrentCity(city: City) {
         if(city!=_currentCity.value){
             fetchJobWeather?.cancel()
             _currentCity.value = city
 
-            fetchJobWeather = viewModelScope.launch{
+            fetchJobWeather = viewModelScope.launch {
                 fetchHistoricalDailyWeathers(city)
             }
         }
@@ -92,6 +105,8 @@ class MainViewModel(
 
     /**
      * Search for cities with minimum 1 second delay between requests
+     * @property query the name of the city to search
+     * @author Leo GUERIN
      */
     fun searchCities(query: String) {
         searchJobCity?.cancel()
@@ -118,7 +133,7 @@ class MainViewModel(
                 _isErrorSearchingCity.value = false
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Keep previous results
+                _isErrorSearchingCity.value = true
             } finally {
                 _isSearchingCity.value = false
             }
@@ -126,7 +141,9 @@ class MainViewModel(
     }
 
     /**
-     * Fetch historical daily weathers for the given city
+     * Fetch historical daily weathers for the given city, convert temperature unit
+     * @property city gives the longitude and latitude to search for
+     * @author Romain CUCHET
      */
     suspend fun fetchHistoricalDailyWeathers(city: City?) {
         city?.let { city ->
@@ -153,8 +170,14 @@ class MainViewModel(
         }
     }
 
-    fun processHistoricalDailyWeathers(dailyWeather: List<DailyWeatherModel>): Pair<List<Int>, List<Double>> {
-        val sorted = dailyWeather.sortedBy { it.date }
+    /**
+     * Process dailyWeathers object to match ui requirements
+     *
+     * @property dailyWeathers The collection of daily weather data to extract information from
+     * @author Romain CUCHET
+     */
+    fun processHistoricalDailyWeathers(dailyWeathers: List<DailyWeatherModel>): Pair<List<Int>, List<Double>> {
+        val sorted = dailyWeathers.sortedBy { it.date }
 
         val years = sorted.map { it.date.year }
         val maxTemperatures = sorted.map { it.temperature.max }
@@ -168,7 +191,7 @@ class MainViewModel(
 
     // TODO: Camille replace mock data with the current city using device position if available
     init {
-        setCurrentCity(City("Paris",48.85566, 2.3522))
+        setCurrentCity(City("Paris", 48.85566, 2.3522))
 
     }
 }
