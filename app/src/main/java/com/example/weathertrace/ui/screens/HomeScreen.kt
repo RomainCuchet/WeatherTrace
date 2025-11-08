@@ -1,4 +1,4 @@
-package com.example.weathertrace.ui.screens.main
+package com.example.weathertrace.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
@@ -7,9 +7,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+
+import com.example.weathertrace.viewModel.MainViewModel
 import com.example.weathertrace.ui.components.SearchTopBar
 import com.example.weathertrace.ui.components.WeatherChart
-import androidx.navigation.NavController
 
 @Composable
 fun HomeScreen(viewModel: MainViewModel, navController: NavController) {

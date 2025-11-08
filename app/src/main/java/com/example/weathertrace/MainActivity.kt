@@ -6,9 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
 
-import com.example.weathertrace.ui.screens.main.MainScreen
-import com.example.weathertrace.ui.screens.main.MainViewModel
-import com.example.weathertrace.ui.screens.main.MainViewModelFactory
+import com.example.weathertrace.ui.screens.MainScreen
+import com.example.weathertrace.viewModel.MainViewModel
+import com.example.weathertrace.viewModel.MainViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

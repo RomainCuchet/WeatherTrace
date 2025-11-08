@@ -39,17 +39,47 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.core.cartesian.Zoom
 import com.patrykandpatrick.vico.core.common.Fill
 
-import com.example.weathertrace.ui.screens.main.MainViewModel
+import com.example.weathertrace.viewModel.MainViewModel
 
 val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH)
 
+/**
+ * Displays a weather chart showing temperature trends across different years.
+ *
+ * This composable observes state from the provided [MainViewModel] to render a
+ * temperature line chart. It handles various UI states:
+ * - Shows an error message if weather data cannot be loaded.
+ * - Displays a loading message while weather data is being fetched.
+ * - Renders a line chart of temperatures over the years once data is available.
+ *
+ * @param viewModel The [MainViewModel] providing weather data and state flows:
+ *  - [MainViewModel.currentProcessedTemps]: The list of processed temperature values.
+ *  - [MainViewModel.currentYears]: The corresponding list of years for the temperatures.
+ *  - [MainViewModel.isSearchingWeather]: Indicates if weather data is being fetched.
+ *  - [MainViewModel.isErrorFetchingWeather]: Indicates if an error occurred while fetching the weather.
+ *  - [MainViewModel.currentTemperatureUnit]: The current temperature unit (°C or °F).
+ *
+ * @author Romain CUCHET
+ * @see MainViewModel
+ */
 @Composable
 fun WeatherChart(viewModel: MainViewModel) {
     val temps = viewModel.currentProcessedTemps.collectAsState()
     val years = viewModel.currentYears.collectAsState()
     val isSearchingWeather = viewModel.isSearchingWeather.collectAsState()
+    val isErrorFetchingWeather = viewModel.isErrorFetchingWeather.collectAsState()
 
-    if (isSearchingWeather.value || temps.value.isEmpty() || years.value.isEmpty()) {
+    if(isErrorFetchingWeather.value){
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(320.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Error loading weather data", style = MaterialTheme.typography.bodyMedium)
+        }
+        return
+    } else if (isSearchingWeather.value || temps.value.isEmpty() || years.value.isEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
