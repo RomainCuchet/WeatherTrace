@@ -1,5 +1,7 @@
 package com.example.weathertrace.ui.screens
 
+import android.os.Build
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.*
@@ -9,9 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
+
+import java.util.Locale
 
 import com.example.weathertrace.ui.components.ComeBackArrow
 import com.example.weathertrace.viewModel.MainViewModel
+import com.example.weathertrace.R
 
 @Composable
 fun SettingsScreen(
@@ -19,6 +26,14 @@ fun SettingsScreen(
     navController: NavController
 ) {
     val currentUnit = viewModel.currentTemperatureUnit.collectAsState()
+    val configuration = LocalConfiguration.current
+
+    // Récupère la langue actuelle du système
+    val systemLanguage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        configuration.locales.get(0)?.displayName ?: Locale.getDefault().displayName
+    } else {
+        configuration.locale?.displayName ?: Locale.getDefault().displayName
+    }
 
     Column(
         modifier = Modifier
@@ -26,20 +41,24 @@ fun SettingsScreen(
             .safeDrawingPadding()
             .padding(horizontal = 16.dp)
     ) {
-        ComeBackArrow(title = "Settings", navController = navController)
+        ComeBackArrow(
+            title = stringResource(R.string.settings_screen_title),
+            navController = navController
+        )
 
-        Text("Temperature Unit", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Options Celsius / Fahrenheit
+        // ---- TEMPERATURE SECTION ----
+        Text(
+            text = stringResource(R.string.settings_temperature_unit),
+            style = MaterialTheme.typography.titleMedium
+        )
+
         val units = listOf("C" to "Celsius (°C)", "F" to "Fahrenheit (°F)")
         units.forEach { (value, label) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .selectable(
-                        selected = currentUnit.value == value,
-                        onClick = { viewModel.setTemperatureUnit(value) }
-                    )
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -51,5 +70,20 @@ fun SettingsScreen(
                 Text(label, style = MaterialTheme.typography.bodyLarge)
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ---- LANGUAGE SECTION ----
+        Text(
+            text = stringResource(R.string.settings_language),
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "${stringResource(R.string.language_system)}: $systemLanguage",
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }

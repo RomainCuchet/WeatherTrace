@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WeatherTrace</string>
+    <string name="missing_city_message">Bonjour WeatherTrace !</string>
+    <string name="error_loading_readme"># Erreur\nImpossible de charger la documentation depuis README.md</string>
+    <string name="doc_screen_title">Documentation</string>
+    <string name="settings_screen_title">Paramètres</string>
+    <string name="settings_temperature_unit">Unité de température</string>
+    <string name="search_city">Rechercher une ville</string>
+    <string name="close_city_search">Fermer la recherche</string>
+    <string name="search">Rechercher</string>
+    <string name="error_loading_cities">Erreur lors du chargement des villes</string>
+    <string name="searching">Recherche en cours…</string>
+    <string name="favorite_cities">Villes favorites</string>
+    <string name="menu">Menu</string>
+    <string name="come_back_arrow_description">Retour</string>
+    <string name="error_loading_weather_data">Erreur lors du chargement des données météo</string>
+    <string name="loading_weather_data">Chargement des données météo…</string>
+    <string name="weather_chart_title">au fil des années 🌡️</string>
+    <string name="weather_chart_start_axis_title">Température</string>
+    <string name="weather_chart_bottom_axis_title">Année</string>
+    <string name="language_system">Système</string>
+    <string name="settings_language">Langue</string>
+</resources>

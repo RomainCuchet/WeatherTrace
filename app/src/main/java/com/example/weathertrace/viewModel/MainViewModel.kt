@@ -7,18 +7,22 @@ import com.example.weathertrace.domain.model.City
 import com.example.weathertrace.domain.model.DailyWeatherModel
 import com.example.weathertrace.domain.repository.CityRepository
 import com.example.weathertrace.domain.repository.WeatherRepository
+import androidx.compose.runtime.*
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
 import java.time.LocalDate
 
 class MainViewModel(
     devMode: Boolean
 ) : ViewModel() {
-
 
     private val cityRepository = CityRepository(devMode = devMode)
     private val weatherRepository = WeatherRepository(devMode = devMode)

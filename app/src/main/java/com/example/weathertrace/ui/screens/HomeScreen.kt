@@ -6,12 +6,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 import com.example.weathertrace.viewModel.MainViewModel
 import com.example.weathertrace.ui.components.SearchTopBar
 import com.example.weathertrace.ui.components.WeatherChart
+import com.example.weathertrace.R
 
 @Composable
 fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
@@ -34,7 +36,7 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
                     .padding(bottom = 16.dp)
             ) {
                 Text(
-                    text = currentCity?.name ?: "Hello WeatherTrace!",
+                    text = currentCity?.name ?: stringResource(R.string.missing_city_message),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 currentCity?.let {

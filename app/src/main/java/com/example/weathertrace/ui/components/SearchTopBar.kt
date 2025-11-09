@@ -32,12 +32,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import com.example.weathertrace.viewModel.MainViewModel
 import com.example.weathertrace.domain.model.City
+import com.example.weathertrace.R
+
 import androidx.navigation.NavController
 
 @Composable
@@ -92,7 +95,7 @@ fun SearchTopBar(
                     },
                     expanded = expanded,
                     onExpandedChange = { expanded = it },
-                    placeholder = { Text("Search city") },
+                    placeholder = { Text(stringResource(R.string.search_city)) },
                     leadingIcon = {
                         if (expanded) {
                             IconButton(onClick = {
@@ -102,13 +105,13 @@ fun SearchTopBar(
                             }) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Close search"
+                                    contentDescription = stringResource(R.string.close_city_search)
                                 )
                             }
                         } else {
                             Icon(
                                 Icons.Default.Search,
-                                contentDescription = "Search"
+                                contentDescription = stringResource(R.string.search)
                             )
                         }
                     },
@@ -116,7 +119,6 @@ fun SearchTopBar(
                         SettingsMenu(
                             expanded = menuExpanded,
                             onExpandedChange = { menuExpanded = it },
-                            viewModel = viewModel,
                             navController = navController
                         )
                     }
@@ -160,10 +162,10 @@ private fun SearchResultsContent(
     val showFavoriteTitle = searchResults.isEmpty() && query.isBlank()
 
     if (isErrorSearchingCity && searchResults.isEmpty()){
-        Indicator("Error loading cities")
+        Indicator(stringResource(R.string.error_loading_cities))
     }
     else if (isSearching && searchResults.isEmpty() && query.isNotBlank()) {
-        Indicator("Searching...")
+        Indicator(stringResource(R.string.searching))
     } else {
         CityList(
             cities = citiesToDisplay,
@@ -199,7 +201,7 @@ private fun CityList(
         if (showFavoriteTitle) {
             item {
                 Text(
-                    text = "Favorite Cities",
+                    text = stringResource(R.string.favorite_cities),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -246,7 +248,6 @@ private fun CityCard(
 private fun SettingsMenu(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
-    viewModel: MainViewModel,
     navController: NavController
 
 ) {
@@ -254,37 +255,22 @@ private fun SettingsMenu(
         IconButton(onClick = { onExpandedChange(true) }) {
             Icon(
                 Icons.Default.MoreVert,
-                contentDescription = "Menu"
+                contentDescription = stringResource(R.string.menu)
             )
         }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { onExpandedChange(false) }
         ) {
-//            DropdownMenuItem(
-//                text = { Text("Celsius (°C)") },
-//                onClick = {
-//                    viewModel.setTemperatureUnit("C")
-//                    onExpandedChange(false)
-//                }
-//            )
-//            DropdownMenuItem(
-//                text = { Text("Fahrenheit (°F)") },
-//                onClick = {
-//                    viewModel.setTemperatureUnit("F")
-//                    onExpandedChange(false)
-//                }
-//            )
-
             DropdownMenuItem(
-                { Text("Settings") },
+                { Text(stringResource(R.string.settings_screen_title)) },
                 onClick = {
                     navController.navigate("settingsScreen")
                 }
             )
 
             DropdownMenuItem(
-                text = { Text("Doc") },
+                text = { Text(stringResource(R.string.doc_screen_title)) },
                 onClick = {
                     navController.navigate("readmeScreen")
                 }

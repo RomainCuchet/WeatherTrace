@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import java.io.IOException
@@ -18,6 +19,7 @@ import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 
 import com.example.weathertrace.ui.components.ComeBackArrow
+import com.example.weathertrace.R
 
 /**
  * Displays the application's README documentation in Markdown format.
@@ -43,7 +45,7 @@ fun ReadMeDocScreen(navController: NavController) {
                     .use { it.readText() }
             } catch (e: IOException) {
                 println("Error loading the README.md file: $e")
-                "# Error\nImpossible to load the documentation from README.md"
+                context.getString(R.string.error_loading_readme)
             }
         )
     }
@@ -58,7 +60,7 @@ fun ReadMeDocScreen(navController: NavController) {
             .padding(horizontal = 16.dp)
             .verticalScroll(scrollState)
     ) {
-        ComeBackArrow(title = "Doc", navController = navController)
+        ComeBackArrow(title = stringResource(R.string.doc_screen_title), navController = navController)
 
         Markdown(
             content = markdownText,

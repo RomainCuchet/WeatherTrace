@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -40,6 +41,7 @@ import com.patrykandpatrick.vico.core.cartesian.Zoom
 import com.patrykandpatrick.vico.core.common.Fill
 
 import com.example.weathertrace.viewModel.MainViewModel
+import com.example.weathertrace.R
 
 val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH)
 
@@ -76,7 +78,7 @@ fun WeatherChart(viewModel: MainViewModel) {
                 .height(320.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("Error loading weather data", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.error_loading_weather_data), style = MaterialTheme.typography.bodyMedium)
         }
         return
     } else if (isSearchingWeather.value || temps.value.isEmpty() || years.value.isEmpty()) {
@@ -86,7 +88,7 @@ fun WeatherChart(viewModel: MainViewModel) {
                 .height(320.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("Loading weather data...", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.loading_weather_data), style = MaterialTheme.typography.bodyMedium)
         }
         return
     }
@@ -105,7 +107,7 @@ fun WeatherChart(viewModel: MainViewModel) {
             .padding(vertical = 16.dp)
     ) {
         Text(
-            text = "${LocalDate.now().format(formatter)} throughout the years 🌡️",
+            text = "${LocalDate.now().format(formatter)} ${stringResource(R.string.weather_chart_title)}",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .fillMaxWidth()
@@ -134,14 +136,14 @@ fun WeatherChart(viewModel: MainViewModel) {
 
         val startAxis = rememberStartAxis(
             label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 2.dp)),
-            title = "Temperature (°${currentUnit.value})",
+            title = "${stringResource(R.string.weather_chart_start_axis_title)} (°${currentUnit.value})",
             titleComponent = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 4.dp, vertical = 8.dp)),
             guideline = null
         )
 
         val bottomAxis = rememberBottomAxis(
             label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(vertical = 2.dp)),
-            title = "Year ${years.value.first()} ➔ ${years.value.last()}",
+            title = "${stringResource(R.string.weather_chart_bottom_axis_title)} ${years.value.first()} ➔ ${years.value.last()}",
             titleComponent = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 4.dp, vertical = 2.dp)),
             guideline = null,
             valueFormatter = { value, _, _ ->

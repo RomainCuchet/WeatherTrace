@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">WeatherTrace</string>
+    <string name="missing_city_message">Hello WeatherTrace!</string>
+    <string name="error_loading_readme"># Error\\nImpossible to load the documentation from README.md</string>
+    <string name="doc_screen_title">Doc</string>
+    <string name="settings_screen_title">Settings</string>
+    <string name="settings_temperature_unit">Temperature Unit</string>
+    <string name="search_city">Search city</string>
+    <string name="close_city_search">Close search</string>
+    <string name="search">Search</string>
+    <string name="error_loading_cities">Error loading cities</string>
+    <string name="searching">Searching…</string>
+    <string name="favorite_cities">Favorite Cities</string>
+    <string name="menu">Menu</string>
+    <string name="come_back_arrow_description">Back</string>
+    <string name="error_loading_weather_data">Error loading weather data</string>
+    <string name="loading_weather_data">Loading weather data…</string>
+    <string name="weather_chart_title">throughout the years 🌡️</string>
+    <string name="weather_chart_start_axis_title">Temperature</string>
+    <string name="weather_chart_bottom_axis_title">Year</string>
+    <string name="language_system">System</string>
+    <string name="settings_language">Language</string>
+
 </resources>
