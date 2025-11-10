@@ -7,9 +7,6 @@ import com.example.weathertrace.domain.model.City
 import com.example.weathertrace.domain.model.DailyWeatherModel
 import com.example.weathertrace.domain.repository.CityRepository
 import com.example.weathertrace.domain.repository.WeatherRepository
-import androidx.compose.runtime.*
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -20,9 +17,15 @@ import kotlinx.coroutines.launch
 
 import java.time.LocalDate
 
+import com.example.weathertrace.domain.model.TemperatureUnit
+import com.example.weathertrace.domain.model.TemperatureType
+
+
 class MainViewModel(
     devMode: Boolean
 ) : ViewModel() {
+
+
 
     private val cityRepository = CityRepository(devMode = devMode)
     private val weatherRepository = WeatherRepository(devMode = devMode)
@@ -33,7 +36,8 @@ class MainViewModel(
     private val _currentResultsWeather = MutableStateFlow<List<DailyWeatherModel>>(emptyList())
     val currentResultsWeather: StateFlow<List<DailyWeatherModel>> = _currentResultsWeather.asStateFlow()
 
-    private var _currentTemps : List<Double> = emptyList()
+    private var _currentMaxTemps: List<Double> = emptyList()
+    private var _currentMinTemps: List<Double> = emptyList()
     private val _currentProcessedTemps = MutableStateFlow<List<Double>>(emptyList())
     val currentProcessedTemps = _currentProcessedTemps.asStateFlow()
 
@@ -59,34 +63,55 @@ class MainViewModel(
     val currentCity: StateFlow<City?> = _currentCity.asStateFlow()
 
 
-    private val _currentTemperatureUnit = MutableStateFlow<String>("F")
+    // TODO: Change Temperature Unit to the one corresponding to usual one for the user (location, language etc, settings etc...)
+    private val _currentTemperatureUnit = MutableStateFlow<TemperatureUnit>(TemperatureUnit.F)
     val currentTemperatureUnit = _currentTemperatureUnit.asStateFlow()
-    private val availableTemperatureUnit = arrayOf("C", "F")
+
+    private val _currentTemperatureTypeToDisplay = MutableStateFlow(TemperatureType.MAX)
+    val currentTemperatureTypeToDisplay = _currentTemperatureTypeToDisplay.asStateFlow()
+
+    fun setTemperatureToDisplay(newType: TemperatureType) {
+        if (newType != _currentTemperatureTypeToDisplay.value) {
+            _currentTemperatureTypeToDisplay.value = newType
+            _currentProcessedTemps.value = convertTemperatures(
+                getCurrentTempsForType(newType),
+                _currentTemperatureUnit.value
+            )
+        }
+    }
 
     /**
      * set a new temperature unit
      *
-     * @property newTemperatureUnit String must be listed as an available temperature unit to be set
+     * @property newUnit String must be listed as an available temperature unit to be set
      * @author Romain CUCHET
      */
-    fun setTemperatureUnit(newTemperatureUnit: String){
-        println("activate temp")
-        if(newTemperatureUnit != _currentTemperatureUnit.value && availableTemperatureUnit.contains(newTemperatureUnit)){
-            _currentTemperatureUnit.value = newTemperatureUnit
-            _currentProcessedTemps.value = convertTemperatures(_currentTemps, _currentTemperatureUnit.value)
+    fun setTemperatureUnit(newUnit: TemperatureUnit) {
+        if (newUnit != _currentTemperatureUnit.value) {
+            _currentTemperatureUnit.value = newUnit
+            _currentProcessedTemps.value = convertTemperatures(
+                getCurrentTempsForType(_currentTemperatureTypeToDisplay.value),
+                _currentTemperatureUnit.value
+            )
         }
     }
 
     fun convertTemperatures(
         temperaturesInKelvin: List<Double>,
-        targetUnit: String
+        targetUnit: TemperatureUnit
     ): List<Double> {
         return temperaturesInKelvin.map { kelvin ->
-            when (targetUnit.uppercase()) {
-                "C" -> kelvin - 273.15
-                "F" -> (kelvin - 273.15) * 9/5 + 32
-                else -> kelvin
+            when (targetUnit) {
+                TemperatureUnit.C -> kelvin - 273.15
+                TemperatureUnit.F -> (kelvin - 273.15) * 9 / 5 + 32
             }
+        }
+    }
+
+    private fun getCurrentTempsForType(type: TemperatureType): List<Double> {
+        return when (type) {
+            TemperatureType.MIN -> _currentMinTemps
+            TemperatureType.MAX -> _currentMaxTemps
         }
     }
 
@@ -150,7 +175,7 @@ class MainViewModel(
      * @author Romain CUCHET
      */
     suspend fun fetchHistoricalDailyWeathers(city: City?) {
-        city?.let { city ->
+        city?.let {
             try {
                 _isSearchingWeather.value = true
                 _currentResultsWeather.value = weatherRepository.getHistoricalDailyWeathers(
@@ -159,12 +184,21 @@ class MainViewModel(
                     LocalDate.now(),
                     apiKey = BuildConfig.OPENWEATHER_API_KEY
                 )
-                _isErrorFetchingWeather.value = false
-                val (years, maxTemps) = processHistoricalDailyWeathers(_currentResultsWeather.value)
-                _currentTemps = maxTemps
+
+                val (years, maxTemps, minTemps) = processHistoricalDailyWeathers(_currentResultsWeather.value)
+
                 _currentYears.value = years
-                _currentProcessedTemps.value = convertTemperatures(_currentTemps,_currentTemperatureUnit.value)
-                println("Fetched data weather")
+                _currentMaxTemps = maxTemps
+                _currentMinTemps = minTemps
+
+                // Appliquer le type de température actuellement sélectionné
+                val currentType = _currentTemperatureTypeToDisplay.value
+                _currentProcessedTemps.value = convertTemperatures(
+                    getCurrentTempsForType(currentType),
+                    _currentTemperatureUnit.value
+                )
+
+                _isErrorFetchingWeather.value = false
             } catch (e: Exception) {
                 e.printStackTrace()
                 _isErrorFetchingWeather.value = true
@@ -180,14 +214,16 @@ class MainViewModel(
      * @property dailyWeathers The collection of daily weather data to extract information from
      * @author Romain CUCHET
      */
-    fun processHistoricalDailyWeathers(dailyWeathers: List<DailyWeatherModel>): Pair<List<Int>, List<Double>> {
+    fun processHistoricalDailyWeathers(
+        dailyWeathers: List<DailyWeatherModel>
+    ): Triple<List<Int>, List<Double>, List<Double>> {
         val sorted = dailyWeathers.sortedBy { it.date }
-
         val years = sorted.map { it.date.year }
         val maxTemperatures = sorted.map { it.temperature.max }
-
-        return years to maxTemperatures
+        val minTemperatures = sorted.map { it.temperature.min }
+        return Triple(years, maxTemperatures, minTemperatures)
     }
+
 
     fun clearSearchResultsCity() {
         _searchResultsCity.value = emptyList()
@@ -196,6 +232,5 @@ class MainViewModel(
     // TODO: Camille replace mock data with the current city using device position if available
     init {
         setCurrentCity(City("Paris", 48.85566, 2.3522))
-
     }
 }

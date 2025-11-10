@@ -11,7 +11,7 @@ This project is a native Android application written in Kotlin to raise awarenes
 - Display historical weather data of a given location up to 45 years.
 - Renders markdown for an elegant ReadMe section up to date with the one on Github
 - If available uses localisation to display your current position weather data
-- Supports English and French
+- The language is set based on your phone's settings. Supports English, French and Spanish
 
 ## Stack
 The app fetches data from

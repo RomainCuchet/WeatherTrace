@@ -21,4 +21,7 @@
     <string name="weather_chart_bottom_axis_title">Année</string>
     <string name="language_system">Système</string>
     <string name="settings_language">Langue</string>
+    <string name="select_temperature_type">température</string>
+    <string name="temperature_min">min</string>
+    <string name="temperature_max">max</string>
 </resources>

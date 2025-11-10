@@ -42,6 +42,7 @@ import com.patrykandpatrick.vico.core.common.Fill
 
 import com.example.weathertrace.viewModel.MainViewModel
 import com.example.weathertrace.R
+import com.example.weathertrace.domain.model.TemperatureType
 
 val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH)
 
@@ -70,6 +71,11 @@ fun WeatherChart(viewModel: MainViewModel) {
     val years = viewModel.currentYears.collectAsState()
     val isSearchingWeather = viewModel.isSearchingWeather.collectAsState()
     val isErrorFetchingWeather = viewModel.isErrorFetchingWeather.collectAsState()
+
+    val optionsTemperature = mapOf(
+        TemperatureType.MIN to stringResource(R.string.temperature_min),
+        TemperatureType.MAX to stringResource(R.string.temperature_max)
+    )
 
     if(isErrorFetchingWeather.value){
         Box(
@@ -133,10 +139,11 @@ fun WeatherChart(viewModel: MainViewModel) {
 
         val lineProvider = LineCartesianLayer.LineProvider.series(listOf(line))
         val currentUnit = viewModel.currentTemperatureUnit.collectAsState()
+        val currentTemperatureTypeToDisplay = viewModel.currentTemperatureTypeToDisplay.collectAsState()
 
         val startAxis = rememberStartAxis(
             label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 2.dp)),
-            title = "${stringResource(R.string.weather_chart_start_axis_title)} (°${currentUnit.value})",
+            title = "${stringResource(R.string.weather_chart_start_axis_title)} ${optionsTemperature[currentTemperatureTypeToDisplay.value]} (°${currentUnit.value})",
             titleComponent = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 4.dp, vertical = 8.dp)),
             guideline = null
         )
