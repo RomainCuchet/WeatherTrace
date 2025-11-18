@@ -47,73 +47,75 @@ import com.example.weathertrace.domain.model.TemperatureType
 val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH)
 
 /**
- * Displays a weather chart showing temperature trends across different years.
+ * Generic weather chart component that displays historical data trends.
  *
- * This composable observes state from the provided [MainViewModel] to render a
- * temperature line chart. It handles various UI states:
- * - Shows an error message if weather data cannot be loaded.
- * - Displays a loading message while weather data is being fetched.
- * - Renders a line chart of temperatures over the years once data is available.
+ * This composable renders a line chart for any weather metric across different years.
+ * It handles various UI states:
+ * - Shows an error message if data cannot be loaded.
+ * - Displays a loading message while data is being fetched.
+ * - Renders a line chart once data is available.
  *
- * @param viewModel The [MainViewModel] providing weather data and state flows:
- *  - [MainViewModel.currentProcessedTemps]: The list of processed temperature values.
- *  - [MainViewModel.currentYears]: The corresponding list of years for the temperatures.
- *  - [MainViewModel.isSearchingWeather]: Indicates if weather data is being fetched.
- *  - [MainViewModel.isErrorFetchingWeather]: Indicates if an error occurred while fetching the weather.
- *  - [MainViewModel.currentTemperatureUnit]: The current temperature unit (°C or °F).
- *
- * @author Romain CUCHET
- * @see MainViewModel
+ * @param title The chart title to display at the top
+ * @param dataValues The list of values to plot on the chart
+ * @param years The corresponding list of years for the x-axis
+ * @param yAxisTitle The title for the y-axis (e.g., "Temperature (°C)", "Humidity (%)")
+ * @param xAxisTitle The title for the x-axis (defaults to year range)
+ * @param isLoading Whether the data is currently being loaded
+ * @param isError Whether an error occurred while fetching data
+ * @param modifier Modifier for the chart container
+ * @param loadingMessage Custom loading message (optional)
+ * @param errorMessage Custom error message (optional)
  */
 @Composable
-fun WeatherChart(viewModel: MainViewModel) {
-    val temps = viewModel.currentProcessedTemps.collectAsState()
-    val years = viewModel.currentYears.collectAsState()
-    val isSearchingWeather = viewModel.isSearchingWeather.collectAsState()
-    val isErrorFetchingWeather = viewModel.isErrorFetchingWeather.collectAsState()
-
-    val optionsTemperature = mapOf(
-        TemperatureType.MIN to stringResource(R.string.temperature_min),
-        TemperatureType.MAX to stringResource(R.string.temperature_max)
-    )
-
-    if(isErrorFetchingWeather.value){
+fun GenericWeatherChart(
+    title: String,
+    dataValues: List<Double>,
+    years: List<Int>,
+    yAxisTitle: String,
+    xAxisTitle: String? = null,
+    isLoading: Boolean = false,
+    isError: Boolean = false,
+    modifier: Modifier = Modifier,
+    loadingMessage: String = stringResource(R.string.loading_weather_data),
+    errorMessage: String = stringResource(R.string.error_loading_weather_data)
+) {
+    if (isError) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .height(320.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(stringResource(R.string.error_loading_weather_data), style = MaterialTheme.typography.bodyMedium)
+            Text(errorMessage, style = MaterialTheme.typography.bodyMedium)
         }
         return
-    } else if (isSearchingWeather.value || temps.value.isEmpty() || years.value.isEmpty()) {
+    } else if (isLoading || dataValues.isEmpty() || years.isEmpty()) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .height(320.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(stringResource(R.string.loading_weather_data), style = MaterialTheme.typography.bodyMedium)
+            Text(loadingMessage, style = MaterialTheme.typography.bodyMedium)
         }
         return
     }
 
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    LaunchedEffect(temps.value) {
+    LaunchedEffect(dataValues) {
         modelProducer.runTransaction {
-            lineSeries { series(temps.value) }
+            lineSeries { series(dataValues) }
         }
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp)
     ) {
         Text(
-            text = "${LocalDate.now().format(formatter)} ${stringResource(R.string.weather_chart_title)}",
+            text = title,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .fillMaxWidth()
@@ -138,24 +140,26 @@ fun WeatherChart(viewModel: MainViewModel) {
         )
 
         val lineProvider = LineCartesianLayer.LineProvider.series(listOf(line))
-        val currentUnit = viewModel.currentTemperatureUnit.collectAsState()
-        val currentTemperatureTypeToDisplay = viewModel.currentTemperatureTypeToDisplay.collectAsState()
 
         val startAxis = rememberStartAxis(
             label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 2.dp)),
-            title = "${stringResource(R.string.weather_chart_start_axis_title)} ${optionsTemperature[currentTemperatureTypeToDisplay.value]} (°${currentUnit.value})",
+            title = yAxisTitle,
             titleComponent = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 4.dp, vertical = 8.dp)),
             guideline = null
         )
 
+        val computedXAxisTitle = xAxisTitle ?: if (years.isNotEmpty()) {
+            "${stringResource(R.string.weather_chart_bottom_axis_title)} ${years.first()} ➔ ${years.last()}"
+        } else ""
+
         val bottomAxis = rememberBottomAxis(
             label = rememberTextComponent(color = Color.Black, padding = Dimensions.of(vertical = 2.dp)),
-            title = "${stringResource(R.string.weather_chart_bottom_axis_title)} ${years.value.first()} ➔ ${years.value.last()}",
+            title = computedXAxisTitle,
             titleComponent = rememberTextComponent(color = Color.Black, padding = Dimensions.of(horizontal = 4.dp, vertical = 2.dp)),
             guideline = null,
             valueFormatter = { value, _, _ ->
                 val index = value.toInt()
-                if (index in years.value.indices) years.value[index].toString() else ""
+                if (index in years.indices) years[index].toString() else ""
             }
         )
 
@@ -178,4 +182,50 @@ fun WeatherChart(viewModel: MainViewModel) {
                 .height(320.dp)
         )
     }
+}
+
+/**
+ * Displays a weather chart showing temperature trends across different years.
+ *
+ * This composable observes state from the provided [MainViewModel] to render a
+ * temperature line chart. It handles various UI states:
+ * - Shows an error message if weather data cannot be loaded.
+ * - Displays a loading message while weather data is being fetched.
+ * - Renders a line chart of temperatures over the years once data is available.
+ *
+ * @param viewModel The [MainViewModel] providing weather data and state flows:
+ *  - [MainViewModel.currentProcessedTemps]: The list of processed temperature values.
+ *  - [MainViewModel.currentYears]: The corresponding list of years for the temperatures.
+ *  - [MainViewModel.isSearchingWeather]: Indicates if weather data is being fetched.
+ *  - [MainViewModel.isErrorFetchingWeather]: Indicates if an error occurred while fetching the weather.
+ *  - [MainViewModel.currentTemperatureUnit]: The current temperature unit (°C or °F).
+ *
+ * @author Romain CUCHET
+ * @see MainViewModel
+ */
+@Composable
+fun WeatherChart(viewModel: MainViewModel) {
+    val temps = viewModel.currentProcessedTemps.collectAsState()
+    val years = viewModel.currentYears.collectAsState()
+    val isSearchingWeather = viewModel.isSearchingWeather.collectAsState()
+    val isErrorFetchingWeather = viewModel.isErrorFetchingWeather.collectAsState()
+    val currentUnit = viewModel.currentTemperatureUnit.collectAsState()
+    val currentTemperatureTypeToDisplay = viewModel.currentTemperatureTypeToDisplay.collectAsState()
+
+    val optionsTemperature = mapOf(
+        TemperatureType.MIN to stringResource(R.string.temperature_min),
+        TemperatureType.MAX to stringResource(R.string.temperature_max)
+    )
+
+    val title = "${LocalDate.now().format(formatter)} ${stringResource(R.string.weather_chart_title)}"
+    val yAxisTitle = "${stringResource(R.string.weather_chart_start_axis_title)} ${optionsTemperature[currentTemperatureTypeToDisplay.value]} (°${currentUnit.value})"
+
+    GenericWeatherChart(
+        title = title,
+        dataValues = temps.value,
+        years = years.value,
+        yAxisTitle = yAxisTitle,
+        isLoading = isSearchingWeather.value,
+        isError = isErrorFetchingWeather.value
+    )
 }

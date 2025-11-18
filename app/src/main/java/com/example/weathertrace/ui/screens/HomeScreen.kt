@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import com.example.weathertrace.viewModel.MainViewModel
 import com.example.weathertrace.ui.components.SearchTopBar
 import com.example.weathertrace.ui.components.WeatherChart
+import com.example.weathertrace.ui.components.WeatherCardsGrid
 import com.example.weathertrace.R
 import com.example.weathertrace.domain.model.TemperatureType
 
@@ -22,7 +23,8 @@ import com.example.weathertrace.domain.model.TemperatureType
 fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
     val currentCity by viewModel.currentCity.collectAsState()
     val currentTemperatureType by viewModel.currentTemperatureTypeToDisplay.collectAsState()
-    val scrollState = rememberScrollState() // ✅ Scroll state
+    val currentWeatherData by viewModel.currentResultsWeather.collectAsState()
+    val currentTemperatureUnit by viewModel.currentTemperatureUnit.collectAsState()
 
     Scaffold(
         topBar = { SearchTopBar(viewModel = viewModel, navController = navController) },
@@ -31,7 +33,7 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState) // ✅ Active le scroll
+                .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
@@ -69,6 +71,21 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
                     onTypeSelected = { newType -> viewModel.setTemperatureToDisplay(newType) }
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // --- Weather Cards Grid ---
+            val isSearchingWeather by viewModel.isSearchingWeather.collectAsState()
+            val isErrorFetchingWeather by viewModel.isErrorFetchingWeather.collectAsState()
+
+            WeatherCardsGrid(
+                weatherData = currentWeatherData.firstOrNull(),
+                historicalWeatherData = currentWeatherData,
+                temperatureUnit = currentTemperatureUnit,
+                isLoading = isSearchingWeather,
+                isError = isErrorFetchingWeather,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
