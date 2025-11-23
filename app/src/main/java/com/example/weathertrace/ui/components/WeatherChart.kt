@@ -200,7 +200,6 @@ fun GenericWeatherChart(
  *  - [MainViewModel.isErrorFetchingWeather]: Indicates if an error occurred while fetching the weather.
  *  - [MainViewModel.currentTemperatureUnit]: The current temperature unit (°C or °F).
  *
- * @author Romain CUCHET
  * @see MainViewModel
  */
 @Composable

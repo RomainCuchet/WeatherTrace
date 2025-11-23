@@ -10,6 +10,7 @@ import androidx.navigation.NavController
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.platform.testTag
 
 import com.example.weathertrace.viewModel.MainViewModel
 import com.example.weathertrace.ui.components.SearchTopBar
@@ -24,11 +25,11 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
     val currentCity by viewModel.currentCity.collectAsState()
     val currentTemperatureType by viewModel.currentTemperatureTypeToDisplay.collectAsState()
     val currentWeatherData by viewModel.currentResultsWeather.collectAsState()
-    val currentTemperatureUnit by viewModel.currentTemperatureUnit.collectAsState()
+
 
     Scaffold(
         topBar = { SearchTopBar(viewModel = viewModel, navController = navController) },
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().testTag("HomeScreen")
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -79,9 +80,8 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
             val isErrorFetchingWeather by viewModel.isErrorFetchingWeather.collectAsState()
 
             WeatherCardsGrid(
-                weatherData = currentWeatherData.firstOrNull(),
+                weatherData = currentWeatherData.lastOrNull(),
                 historicalWeatherData = currentWeatherData,
-                temperatureUnit = currentTemperatureUnit,
                 isLoading = isSearchingWeather,
                 isError = isErrorFetchingWeather,
                 modifier = Modifier.fillMaxWidth()

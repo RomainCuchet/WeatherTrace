@@ -32,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
@@ -72,6 +73,7 @@ fun SearchTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .semantics { isTraversalGroup = true }
+            .testTag("SearchTopBar")
     ) {
         SearchBar(
             modifier = Modifier
@@ -116,7 +118,7 @@ fun SearchTopBar(
                         }
                     },
                     trailingIcon = {
-                        SettingsMenu(
+                        MenuButton(
                             expanded = menuExpanded,
                             onExpandedChange = { menuExpanded = it },
                             navController = navController
@@ -245,14 +247,17 @@ private fun CityCard(
 }
 
 @Composable
-private fun SettingsMenu(
+private fun MenuButton(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     navController: NavController
 
 ) {
     Box {
-        IconButton(onClick = { onExpandedChange(true) }) {
+        IconButton(
+            onClick = { onExpandedChange(true) },
+            modifier = Modifier.testTag("MenuButton")
+        ) {
             Icon(
                 Icons.Default.MoreVert,
                 contentDescription = stringResource(R.string.menu)

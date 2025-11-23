@@ -12,6 +12,7 @@ import androidx.navigation.NavController
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 
 import java.util.Locale
 
@@ -43,7 +44,7 @@ fun SettingsScreen(
     ) {
         ComeBackArrow(
             title = stringResource(R.string.settings_screen_title),
-            navController = navController
+            navController = navController,
         )
 
         Spacer(modifier = Modifier.height(24.dp))

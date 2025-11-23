@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 
 import com.example.weathertrace.R
@@ -22,13 +23,16 @@ fun ComeBackArrow(
     navController: NavController,
     onClick: (() -> Unit)? = null
 ) {
+
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
         modifier = Modifier.fillMaxWidth()
     ) {
         IconButton(
-            onClick = { onClick?.invoke() ?: navController.popBackStack() }
+            onClick = { onClick?.invoke() ?: navController.popBackStack() },
+            modifier = Modifier.testTag("ComeBackArrow")
         ) {
             Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.close_city_search))
         }

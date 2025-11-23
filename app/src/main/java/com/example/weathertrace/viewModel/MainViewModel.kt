@@ -84,7 +84,6 @@ class MainViewModel(
      * set a new temperature unit
      *
      * @property newUnit String must be listed as an available temperature unit to be set
-     * @author Romain CUCHET
      */
     fun setTemperatureUnit(newUnit: TemperatureUnit) {
         if (newUnit != _currentTemperatureUnit.value) {
@@ -119,7 +118,6 @@ class MainViewModel(
      * Set a new current city. If the changes then we fetch its historical weather data.
      *
      * @property city the new curent city
-     * @author Romain CUCHET
      */
     fun setCurrentCity(city: City) {
         if(city!=_currentCity.value){
@@ -135,7 +133,6 @@ class MainViewModel(
     /**
      * Search for cities with minimum 1 second delay between requests
      * @property query the name of the city to search
-     * @author Leo GUERIN
      */
     fun searchCities(query: String) {
         searchJobCity?.cancel()
@@ -172,7 +169,6 @@ class MainViewModel(
     /**
      * Fetch historical daily weathers for the given city, convert temperature unit
      * @property city gives the longitude and latitude to search for
-     * @author Romain CUCHET
      */
     suspend fun fetchHistoricalDailyWeathers(city: City?) {
         city?.let {
@@ -184,6 +180,8 @@ class MainViewModel(
                     LocalDate.now(),
                     apiKey = BuildConfig.OPENWEATHER_API_KEY
                 )
+
+                _currentResultsWeather.value = _currentResultsWeather.value.sortedBy { it.date }
 
                 val (years, maxTemps, minTemps) = processHistoricalDailyWeathers(_currentResultsWeather.value)
 
@@ -212,15 +210,13 @@ class MainViewModel(
      * Process dailyWeathers object to match ui requirements
      *
      * @property dailyWeathers The collection of daily weather data to extract information from
-     * @author Romain CUCHET
      */
     fun processHistoricalDailyWeathers(
         dailyWeathers: List<DailyWeatherModel>
     ): Triple<List<Int>, List<Double>, List<Double>> {
-        val sorted = dailyWeathers.sortedBy { it.date }
-        val years = sorted.map { it.date.year }
-        val maxTemperatures = sorted.map { it.temperature.max }
-        val minTemperatures = sorted.map { it.temperature.min }
+        val years = dailyWeathers.map { it.date.year }
+        val maxTemperatures = dailyWeathers.map { it.temperature.max }
+        val minTemperatures = dailyWeathers.map { it.temperature.min }
         return Triple(years, maxTemperatures, minTemperatures)
     }
 

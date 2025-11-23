@@ -63,7 +63,7 @@ class WeatherRepository(
     /**
      * Generate mock data for development.
      */
-    private fun getMockDailyWeather(date: LocalDate): DailyWeatherModel {
+    private fun getMockDailyWeather(date: LocalDate, ): DailyWeatherModel {
         val minTemp = Random.nextDouble(253.15, 283.15)
         val maxTemp = Random.nextDouble(minTemp + 1, minTemp + 15)
         val morningTemp = Random.nextDouble(minTemp, maxTemp)

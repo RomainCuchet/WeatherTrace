@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -31,7 +32,6 @@ import com.example.weathertrace.R
  * A top navigation arrow allows returning to the previous screen.
  *
  * @param navController The [NavController] used for navigation within the app.
- * @author Romain CUCHET
  */
 @Composable
 fun ReadMeDocScreen(navController: NavController) {
@@ -60,7 +60,10 @@ fun ReadMeDocScreen(navController: NavController) {
             .padding(horizontal = 16.dp)
             .verticalScroll(scrollState)
     ) {
-        ComeBackArrow(title = stringResource(R.string.doc_screen_title), navController = navController)
+        ComeBackArrow(
+            title = stringResource(R.string.doc_screen_title),
+            navController = navController,
+        )
 
         Markdown(
             content = markdownText,

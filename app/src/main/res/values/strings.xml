@@ -23,5 +23,6 @@
     <string name="select_temperature_type">temperature</string>
     <string name="temperature_min">min</string>
     <string name="temperature_max">max</string>
+    <string name="not_fetched_data" translatable="false">—</string>
 
 </resources>

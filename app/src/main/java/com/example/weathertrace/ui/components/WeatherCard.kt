@@ -3,18 +3,21 @@ package com.example.weathertrace.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DeviceThermostat
+import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.weathertrace.domain.model.*
-import java.time.LocalDate
+import com.example.weathertrace.R
 import kotlin.math.roundToInt
 
 /**
@@ -26,60 +29,56 @@ import kotlin.math.roundToInt
 fun WeatherCardsGrid(
     weatherData: DailyWeatherModel?,
     historicalWeatherData: List<DailyWeatherModel>,
-    temperatureUnit: TemperatureUnit,
     isLoading: Boolean = false,
-    isError: Boolean = false,
+    isError : Boolean,
     modifier: Modifier = Modifier
 ) {
     var selectedCard by remember { mutableStateOf<WeatherCardType?>(null) }
     val sheetState = rememberModalBottomSheetState()
 
     Column(modifier = modifier) {
-        if (weatherData != null) {
+        if (weatherData != null && !isError) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // First row: Temperature and Wind
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    WeatherCard(
-                        type = WeatherCardType.Temperature(weatherData.temperature, temperatureUnit),
-                        onClick = { selectedCard = it },
-                        modifier = Modifier.weight(1f)
-                    )
-                    WeatherCard(
-                        type = WeatherCardType.Wind(weatherData.wind),
-                        onClick = { selectedCard = it },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
 
-                // Second row: Humidity and Precipitation
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    WeatherCard(
-                        type = WeatherCardType.Humidity(weatherData.humidity.afternoon),
-                        onClick = { selectedCard = it },
-                        modifier = Modifier.weight(1f)
-                    )
                     WeatherCard(
                         type = WeatherCardType.Precipitation(weatherData.precipitation.total),
                         onClick = { selectedCard = it },
                         modifier = Modifier.weight(1f)
                     )
+
+                    WeatherCard(
+                        type = WeatherCardType.CloudCover(weatherData.cloudCover.afternoon),
+                        onClick = { selectedCard = it },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                // Second row: Wind and Cloud Cover
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    WeatherCard(
+                        type = WeatherCardType.Wind(weatherData.wind),
+                        onClick = { selectedCard = it },
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    WeatherCard(
+                        type = WeatherCardType.Humidity(weatherData.humidity.afternoon),
+                        onClick = { selectedCard = it },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
-        } else {
-            Text(
-                text = "No weather data available",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(16.dp)
-            )
         }
     }
 
@@ -212,6 +211,12 @@ fun WeatherDetailBottomSheet(
                 weatherData.map { it.precipitation.total },
                 "Precipitation (mm)"
             )
+            is WeatherCardType.CloudCover -> Triple(
+                "Historical Cloud Cover Trends",
+                weatherData.map {it.cloudCover.afternoon},
+                "Cloud Cover (%)"
+
+            )
         }
 
         GenericWeatherChart(
@@ -248,19 +253,25 @@ sealed class WeatherCardType {
     data class Wind(val wind: com.example.weathertrace.domain.model.Wind) : WeatherCardType() {
         override val title = "Wind"
         override val value = "${wind.max.speed.roundToInt()} km/h"
-        override val icon = Icons.Default.Cloud
+        override val icon = Icons.Default.Air
     }
 
     data class Humidity(val humidity: Double) : WeatherCardType() {
         override val title = "Humidity"
         override val value = "${humidity.roundToInt()}%"
-        override val icon = Icons.Default.WaterDrop
+        override val icon = Icons.Default.Opacity
     }
 
     data class Precipitation(val precipitation: Double) : WeatherCardType() {
         override val title = "Precipitation"
         override val value = "${precipitation.roundToInt()} mm"
         override val icon = Icons.Default.WaterDrop
+    }
+
+    data class CloudCover(val cloudCover: Double): WeatherCardType(){
+        override val title = "Could Cover";
+        override val value = "${cloudCover.roundToInt()}%"
+        override val icon = Icons.Default.Cloud
     }
 }
 
