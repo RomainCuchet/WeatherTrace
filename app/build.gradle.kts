@@ -37,6 +37,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        viewBinding = true
     }
 
     compileOptions {
@@ -64,6 +65,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.moshi:moshi:1.15.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
+    implementation(libs.play.services.location)
     ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.0")
 
     // --- Coroutines ---
@@ -102,4 +104,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // --- Permissions ---
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
 }
