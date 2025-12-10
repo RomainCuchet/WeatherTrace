@@ -13,6 +13,8 @@
     <string name="searching">Buscando…</string>
     <string name="favorite_cities">Ciudades favoritas</string>
     <string name="menu">Menú</string>
+    <string name="add_to_favorites">Añadir a favoritos</string>
+    <string name="remove_from_favorites">Quitar de favoritos</string>
     <string name="come_back_arrow_description">Volver</string>
     <string name="error_loading_weather_data">Error al cargar los datos meteorológicos</string>
     <string name="loading_weather_data">Cargando datos meteorológicos…</string>

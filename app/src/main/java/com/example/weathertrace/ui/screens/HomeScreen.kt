@@ -10,12 +10,18 @@ import androidx.navigation.NavController
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.ui.graphics.vector.ImageVector
 
 import com.example.weathertrace.viewModel.MainViewModel
 import com.example.weathertrace.ui.components.SearchTopBar
 import com.example.weathertrace.ui.components.WeatherChart
 import com.example.weathertrace.R
 import com.example.weathertrace.domain.model.TemperatureType
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,21 +42,40 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
                 .padding(16.dp)
         ) {
             // --- City display ---
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = currentCity?.name ?: stringResource(R.string.missing_city_message),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                currentCity?.let {
-                    Text(
-                        text = "${it.lat}, ${it.lon}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+            currentCity?.let { city -> //évite de remettre des if city existe partout
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically // Aligne le texte et l'icône sur la même ligne
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(bottom = 16.dp)
+                    ) {
+                        Text(
+                            text = city.name,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "${city.lat}, ${city.lon}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    IconButton(
+                        onClick = { viewModel.toggleFavorite(city) },
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (city.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = if (city.isFavorite) stringResource(R.string.remove_from_favorites) else stringResource(R.string.add_to_favorites),
+                            tint = if (city.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
+
             }
 
             // --- Weather chart ---

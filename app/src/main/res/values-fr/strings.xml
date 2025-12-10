@@ -12,6 +12,8 @@
     <string name="error_loading_cities">Erreur lors du chargement des villes</string>
     <string name="searching">Recherche en cours…</string>
     <string name="favorite_cities">Villes favorites</string>
+    <string name="add_to_favorites">Ajouter aux favoris</string>
+    <string name="remove_from_favorites">Retirer des favoris</string>
     <string name="menu">Menu</string>
     <string name="come_back_arrow_description">Retour</string>
     <string name="error_loading_weather_data">Erreur lors du chargement des données météo</string>
