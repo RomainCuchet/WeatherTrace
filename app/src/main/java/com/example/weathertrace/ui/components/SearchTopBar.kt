@@ -4,14 +4,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -24,6 +29,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -58,17 +65,21 @@ fun SearchTopBar(
     val searchResults = viewModel.searchResultsCity.collectAsState()
     val isSearching = viewModel.isSearchingCity.collectAsState()
     val isErrorSearchingCity = viewModel.isErrorSearchingCity.collectAsState()
+    val favoriteCities by viewModel.favoriteCities.collectAsState()
 
     // mock
     // TODO: get favorite cities from database
-    val favoriteCities = listOf<City>(
+    /*val favoriteCities = listOf<City>(
         City(name = "Paris", lat = 48.8566, lon = 2.3522),
         City(name = "London", lat = 51.5074, lon = -0.1278),
         City(name = "New York", lat = 40.7128, lon = -74.0060),
         City(name = "Tokyo", lat = 35.6895, lon = 139.6917),
         City(name = "Sydney", lat = -33.8688, lon = 151.2093),
     )
-
+     */
+    LaunchedEffect(Unit) {
+        viewModel.loadFavorites() //se lance qu'une seule fois
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -140,6 +151,9 @@ fun SearchTopBar(
                     expanded = false
                     viewModel.setCurrentCity(city)
                     viewModel.clearSearchResultsCity()
+                },
+                onFavoriteClick = { city ->
+                    viewModel.toggleFavorite(city)
                 }
             )
         }
@@ -153,7 +167,8 @@ private fun SearchResultsContent(
     searchResults: List<City>,
     query: String,
     favoriteCities: List<City>,
-    onCitySelected: (City) -> Unit
+    onCitySelected: (City) -> Unit,
+    onFavoriteClick: (City) -> Unit
 ) {
     val citiesToDisplay = if (searchResults.isEmpty() && query.isBlank()) {
         favoriteCities
@@ -172,7 +187,8 @@ private fun SearchResultsContent(
         CityList(
             cities = citiesToDisplay,
             showFavoriteTitle = showFavoriteTitle,
-            onCitySelected = onCitySelected
+            onCitySelected = onCitySelected,
+            onFavoriteClick = onFavoriteClick
         )
     }
 }
@@ -193,7 +209,8 @@ private fun Indicator(text : String) {
 private fun CityList(
     cities: List<City>,
     showFavoriteTitle: Boolean,
-    onCitySelected: (City) -> Unit
+    onCitySelected: (City) -> Unit,
+    onFavoriteClick: (City) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -213,7 +230,8 @@ private fun CityList(
         items(cities) { city ->
             CityCard(
                 city = city,
-                onClick = { onCitySelected(city) }
+                onClick = { onCitySelected(city) },
+                onFavoriteClick = { onFavoriteClick(city) }
             )
         }
     }
@@ -222,7 +240,8 @@ private fun CityList(
 @Composable
 private fun CityCard(
     city: City,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onFavoriteClick: (City) -> Unit
 ) {
     Card(
         shape = MaterialTheme.shapes.extraLarge,
@@ -233,15 +252,27 @@ private fun CityCard(
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp), // Ajuster le padding
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = city.name,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
             )
+            IconButton(
+                onClick = { onFavoriteClick(city) },
+                modifier = Modifier.padding(start = 8.dp)
+            ) {
+                Icon(
+                    imageVector = if (city.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (city.isFavorite) stringResource(R.string.remove_from_favorites) else stringResource(R.string.add_to_favorites),
+                    tint = if (city.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

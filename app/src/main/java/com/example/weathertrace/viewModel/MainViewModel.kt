@@ -65,6 +65,9 @@ class MainViewModel(
     private val _currentTemperatureTypeToDisplay = MutableStateFlow(TemperatureType.MAX)
     val currentTemperatureTypeToDisplay = _currentTemperatureTypeToDisplay.asStateFlow()
 
+    private val _favoriteCities = MutableStateFlow<List<City>>(emptyList())
+    val favoriteCities: StateFlow<List<City>> = _favoriteCities.asStateFlow()
+
     fun setTemperatureToDisplay(newType: TemperatureType) {
         if (newType != _currentTemperatureTypeToDisplay.value) {
             _currentTemperatureTypeToDisplay.value = newType
@@ -225,6 +228,31 @@ class MainViewModel(
         val minTemperatures = dailyWeathers.map { it.temperature.min }
         return Triple(years, maxTemperatures, minTemperatures)
     }
+
+    fun loadFavorites() {
+        _favoriteCities.value = cityRepository.getFavorites()
+    }
+
+    fun toggleFavorite(city: City) {
+        if (cityRepository.isFavorite(city)) {
+            cityRepository.removeFavorite(city)
+        } else {
+            cityRepository.addFavorite(city)
+        }
+
+        currentCity.value?.let {
+            if (it.name == city.name && it.lat == city.lat) {
+                _currentCity.value = it.copy(isFavorite = cityRepository.isFavorite(it))
+            }
+        }
+        _searchResultsCity.value = _searchResultsCity.value.map {
+            if (it.name == city.name && it.lat == city.lat)
+                it.copy(isFavorite = cityRepository.isFavorite(it))
+            else it
+        }
+        loadFavorites() //updating list
+    }
+
 
     fun clearSearchResultsCity() {
         _searchResultsCity.value = emptyList()
