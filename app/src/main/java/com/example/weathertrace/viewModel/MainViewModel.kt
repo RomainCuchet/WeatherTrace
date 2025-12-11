@@ -20,12 +20,9 @@ import java.time.LocalDate
 import com.example.weathertrace.domain.model.TemperatureUnit
 import com.example.weathertrace.domain.model.TemperatureType
 
-
 class MainViewModel(
     devMode: Boolean
 ) : ViewModel() {
-
-
 
     private val cityRepository = CityRepository(devMode = devMode)
     private val weatherRepository = WeatherRepository(devMode = devMode)
@@ -44,7 +41,6 @@ class MainViewModel(
     private var _currentYears = MutableStateFlow<List<Int>>(emptyList())
     val currentYears = _currentYears.asStateFlow()
 
-
     private val _isSearchingCity = MutableStateFlow(false)
     val isSearchingCity: StateFlow<Boolean> = _isSearchingCity.asStateFlow()
 
@@ -61,7 +57,6 @@ class MainViewModel(
     private var fetchJobWeather: Job? = null
     private val _currentCity = MutableStateFlow<City?>(null)
     val currentCity: StateFlow<City?> = _currentCity.asStateFlow()
-
 
     // TODO: Change Temperature Unit to the one corresponding to usual one for the user (location, language etc, settings etc...)
     private val _currentTemperatureUnit = MutableStateFlow<TemperatureUnit>(TemperatureUnit.F)
@@ -115,9 +110,20 @@ class MainViewModel(
     }
 
     /**
+     * Set a new initial city.
+     *
+     * @property city the new initial city
+     */
+    fun setInitialCity(city: City) {
+        if (_currentCity.value != city){
+            setCurrentCity(city)
+        }
+    }
+
+    /**
      * Set a new current city. If the changes then we fetch its historical weather data.
      *
-     * @property city the new curent city
+     * @property city the new current city
      */
     fun setCurrentCity(city: City) {
         if(city!=_currentCity.value){
@@ -220,13 +226,7 @@ class MainViewModel(
         return Triple(years, maxTemperatures, minTemperatures)
     }
 
-
     fun clearSearchResultsCity() {
         _searchResultsCity.value = emptyList()
-    }
-
-    // TODO: Camille replace mock data with the current city using device position if available
-    init {
-        setCurrentCity(City("Paris", 48.85566, 2.3522))
     }
 }
