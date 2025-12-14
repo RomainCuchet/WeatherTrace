@@ -40,6 +40,7 @@ fun HomeScreen(viewModel: MainViewModel, navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .safeDrawingPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
                 .padding(16.dp)

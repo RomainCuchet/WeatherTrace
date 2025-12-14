@@ -28,7 +28,8 @@ We use the following librairies :
 ## Architecture
 
 The app follows the Model View ViewModel (MVVM) design pattern to separate business logic to user interface.
-```
+
+
 C:.
 ├───data
 │   ├───local
@@ -50,7 +51,7 @@ C:.
 │   └───theme
 └───viewModel
 
-```
+
 The data layer is separated within local and remote sources to enhance modularity.
 
 ## TEAM
