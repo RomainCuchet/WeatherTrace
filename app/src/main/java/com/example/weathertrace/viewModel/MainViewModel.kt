@@ -1,6 +1,7 @@
 package com.example.weathertrace.viewModel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weathertrace.BuildConfig
 import com.example.weathertrace.domain.model.City
@@ -14,6 +15,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 import java.time.LocalDate
 
@@ -21,10 +24,14 @@ import com.example.weathertrace.domain.model.TemperatureUnit
 import com.example.weathertrace.domain.model.TemperatureType
 
 class MainViewModel(
-    devMode: Boolean
-) : ViewModel() {
+    application: Application,
+    devMode: Boolean = false
+) : AndroidViewModel(application) {
 
-    private val cityRepository = CityRepository(devMode = devMode)
+    private val cityRepository = CityRepository(
+        context = application.applicationContext,
+        devMode = devMode
+    )
     private val weatherRepository = WeatherRepository(devMode = devMode)
 
     private val _searchResultsCity = MutableStateFlow<List<City>>(emptyList())
@@ -65,8 +72,18 @@ class MainViewModel(
     private val _currentTemperatureTypeToDisplay = MutableStateFlow(TemperatureType.MAX)
     val currentTemperatureTypeToDisplay = _currentTemperatureTypeToDisplay.asStateFlow()
 
-    private val _favoriteCities = MutableStateFlow<List<City>>(emptyList())
-    val favoriteCities: StateFlow<List<City>> = _favoriteCities.asStateFlow()
+    val favoriteCities: StateFlow<List<City>> = cityRepository.favoriteCities.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList<City>()
+    )
+
+    init {
+        // Load favorites at startup
+        viewModelScope.launch {
+            cityRepository.loadFavorites()
+        }
+    }
 
     fun setTemperatureToDisplay(newType: TemperatureType) {
         if (newType != _currentTemperatureTypeToDisplay.value) {
@@ -164,7 +181,10 @@ class MainViewModel(
 
             try {
                 val results = cityRepository.searchCities(query, limit = 5)
-                _searchResultsCity.value = results
+                // Mark cities as favorite if they are in the favorites list
+                _searchResultsCity.value = results.map { city ->
+                    city.copy(isFavorite = cityRepository.isFavorite(city))
+                }
                 _isErrorSearchingCity.value = false
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -229,30 +249,54 @@ class MainViewModel(
         return Triple(years, maxTemperatures, minTemperatures)
     }
 
-    fun loadFavorites() {
-        _favoriteCities.value = cityRepository.getFavorites()
-    }
-
+    /**
+     * Toggle favorite status of a city (add or remove)
+     * Now with persistence via DataStore
+     */
     fun toggleFavorite(city: City) {
-        if (cityRepository.isFavorite(city)) {
-            cityRepository.removeFavorite(city)
-        } else {
-            cityRepository.addFavorite(city)
-        }
-
-        currentCity.value?.let {
-            if (it.name == city.name && it.lat == city.lat) {
-                _currentCity.value = it.copy(isFavorite = cityRepository.isFavorite(it))
+        viewModelScope.launch {
+            if (cityRepository.isFavorite(city)) {
+                cityRepository.removeFavorite(city)
+            } else {
+                cityRepository.addFavorite(city)
             }
+
+            // Update current city if it matches
+            currentCity.value?.let {
+                if (it.name == city.name && it.lat == city.lat) {
+                    _currentCity.value = it.copy(isFavorite = cityRepository.isFavorite(it))
+                }
+            }
+
+            // Update search results
+            _searchResultsCity.value = _searchResultsCity.value.map {
+                if (it.name == city.name && it.lat == city.lat)
+                    it.copy(isFavorite = cityRepository.isFavorite(it))
+                else it
+            }
+
+            // No need to call loadFavorites() anymore - the Flow updates automatically
         }
-        _searchResultsCity.value = _searchResultsCity.value.map {
-            if (it.name == city.name && it.lat == city.lat)
-                it.copy(isFavorite = cityRepository.isFavorite(it))
-            else it
-        }
-        loadFavorites() //updating list
     }
 
+    /**
+     * Reorder favorites in the list
+     */
+    fun reorderFavorites(fromIndex: Int, toIndex: Int) {
+        viewModelScope.launch {
+            cityRepository.reorderFavorites(fromIndex, toIndex)
+            // The Flow will automatically update the UI
+        }
+    }
+
+    /**
+     * Clear all favorites
+     */
+    fun clearAllFavorites() {
+        viewModelScope.launch {
+            cityRepository.clearFavorites()
+        }
+    }
 
     fun clearSearchResultsCity() {
         _searchResultsCity.value = emptyList()

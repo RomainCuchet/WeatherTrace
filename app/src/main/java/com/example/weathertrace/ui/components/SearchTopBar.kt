@@ -77,9 +77,7 @@ fun SearchTopBar(
         City(name = "Sydney", lat = -33.8688, lon = 151.2093),
     )
      */
-    LaunchedEffect(Unit) {
-        viewModel.loadFavorites() //se lance qu'une seule fois
-    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()

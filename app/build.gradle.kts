@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.0.21"
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.21"
     id("com.google.devtools.ksp") version "2.0.21-1.0.27"
+    kotlin("plugin.serialization") version "1.9.0"
 }
 
 android {
@@ -113,4 +114,9 @@ dependencies {
 
     // --- Permissions ---
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+
+    // --- DataStore ---
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
 }

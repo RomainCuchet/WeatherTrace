@@ -19,7 +19,10 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             val viewModel: MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-                factory = MainViewModelFactory(BuildConfig.DEV_MODE)
+                factory = MainViewModelFactory(
+                    application = application,
+                    devMode = BuildConfig.DEV_MODE
+                )
             )
             MaterialTheme {
                 MainScreen(viewModel = viewModel)
