@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,7 +35,10 @@ fun WeatherCardsGrid(
     modifier: Modifier = Modifier
 ) {
     var selectedCard by remember { mutableStateOf<WeatherCardType?>(null) }
-    val sheetState = rememberModalBottomSheetState()
+
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
 
     Column(modifier = modifier) {
         if (weatherData != null && !isError) {
@@ -84,17 +88,26 @@ fun WeatherCardsGrid(
 
     // Bottom Sheet with historical chart
     selectedCard?.let { cardType ->
+        val configuration = LocalConfiguration.current
+        val modalHeight = configuration.screenHeightDp * 0.7f
+
         ModalBottomSheet(
             onDismissRequest = { selectedCard = null },
             sheetState = sheetState
         ) {
-            WeatherDetailBottomSheet(
-                cardType = cardType,
-                weatherData = historicalWeatherData,
-                isLoading = isLoading,
-                isError = isError,
-                onDismiss = { selectedCard = null }
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(modalHeight.dp)
+            ) {
+                WeatherDetailBottomSheet(
+                    cardType = cardType,
+                    weatherData = historicalWeatherData,
+                    isLoading = isLoading,
+                    isError = isError,
+                    onDismiss = { selectedCard = null }
+                )
+            }
         }
     }
 }
